@@ -21,7 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public final class Profiles extends JavaPlugin implements Listener {
@@ -97,9 +97,7 @@ public final class Profiles extends JavaPlugin implements Listener {
             switch(i) {
                 case 12:
                     if (this.getConfig().contains("data." + uuid + ".slot0")) {
-                        LocalDateTime date = LocalDateTime.parse(this.getConfig().getString("data." + uuid + ".slot0" + ".dateSaved"));
-                        String dateTimeString = date.getMonthValue() + "/" + date.getDayOfMonth() + "/" + date.getYear() + " &8: &6" + date.getHour() + ":" + date.getMinute() + ":" + date.getSecond();
-
+                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(this.getConfig().getString("data." + uuid + ".slot0" + ".dateSaved")));
                         double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot0" + ".healthLevel");
                         int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot0" + ".hungerLevel");
                         int xpLevel = this.getConfig().getInt("data." + uuid + ".slot0" + ".experience.xpLevel");
@@ -131,9 +129,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                     break;
                 case 13:
                     if (this.getConfig().contains("data." + uuid + ".slot1")) {
-                        LocalDateTime date = LocalDateTime.parse(this.getConfig().getString("data." + uuid + ".slot1" + ".dateSaved"));
-                        String dateTimeString = date.getMonthValue() + "/" + date.getDayOfMonth() + "/" + date.getYear() + " &8: &6" + date.getHour() + ":" + date.getMinute() + ":" + date.getSecond();
-
+                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(this.getConfig().getString("data." + uuid + ".slot1" + ".dateSaved")));
                         double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot1" + ".healthLevel");
                         int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot1" + ".hungerLevel");
                         int xpLevel = this.getConfig().getInt("data." + uuid + ".slot1" + ".experience.xpLevel");
@@ -165,9 +161,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                     break;
                 case 14:
                     if (this.getConfig().contains("data." + uuid + ".slot2")) {
-                        LocalDateTime date = LocalDateTime.parse(this.getConfig().getString("data." + uuid + ".slot2" + ".dateSaved"));
-                        String dateTimeString = date.getMonthValue() + "/" + date.getDayOfMonth() + "/" + date.getYear() + " &8: &6" + date.getHour() + ":" + date.getMinute() + ":" + date.getSecond();
-
+                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(this.getConfig().getString("data." + uuid + ".slot2" + ".dateSaved")));
                         double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot2" + ".healthLevel");
                         int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot2" + ".hungerLevel");
                         int xpLevel = this.getConfig().getInt("data." + uuid + ".slot2" + ".experience.xpLevel");
@@ -223,8 +217,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         UUID uuid = player.getUniqueId();
         String playerName = player.getDisplayName();
 
-        // TODO: Make this date object nicer to read.
-        String dateSaved = LocalDateTime.now().toString();
+        String dateSaved = new Date().toString();
         double healthLevel = player.getHealth();
         int hungerLevel = player.getFoodLevel();
         int xpLevel = player.getTotalExperience();
