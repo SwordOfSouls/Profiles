@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.2.0] - 03-13-2021
+## [1.2.1] - 03-12-2021
+
+Clean up all warnings and typos in main class
+
+### Changed
+- Applied all quick fixes from IDE to main Profiles class
+
+## [1.2.0] - 03-12-2021
 
 Add CHANGELOG.md to better track changes. Update date format to be prettier.
 
