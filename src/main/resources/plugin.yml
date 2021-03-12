@@ -1,5 +1,5 @@
 name: Profiles
-version: ${project.version}
+version: 1.1.0
 main: com.cmpscjg.profiles.Profiles
 api-version: 1.16
 authors: [ CMPSCjg ]
@@ -9,3 +9,13 @@ commands:
   profiles:
     description: Main plugin command
     usage: /<command>
+
+
+permissions:
+  profiles.*:
+    description: Gives access to all Profiles features/commands.
+    children:
+      profiles.reload: true
+  profiles.reload:
+    description: Allows you to reload plugin configuration.
+    default: op

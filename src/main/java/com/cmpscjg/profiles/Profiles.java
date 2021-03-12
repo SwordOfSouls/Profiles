@@ -28,6 +28,7 @@ public final class Profiles extends JavaPlugin implements Listener {
 
     private FileConfiguration profileData = null;
     private File profileFile = null;
+    private String pluginVersion = "";
 
     public final ArrayList<Integer> clickedArray = new ArrayList<Integer>(Arrays.asList(new Integer[] {-1}));
 
@@ -41,24 +42,19 @@ public final class Profiles extends JavaPlugin implements Listener {
         // Save default config.yml
         this.saveDefaultConfig();
 
-        // Load data.yml
-
+        // Get plugin version
+        pluginVersion = this.getDescription().getVersion();
 
         // Register main class events
         this.getServer().getPluginManager().registerEvents(this, this);
     }
 
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
-    }
-
     // ------------------------ Utils ------------------------
     public void getMainMenu(CommandSender sender) {
-        sender.sendMessage(color("&e*&8------------- &dProfiles: v1.0.0 &8-------------&e*"));
+        sender.sendMessage(color("&e*&8------------- &dProfiles: v" + pluginVersion + " &8-------------&e*"));
         sender.sendMessage(color("&d/profiles open &8: &7Open the Profiles main menu"));
         
-        if (sender.hasPermission("Profiles.admin")) {
+        if (sender.hasPermission("Profiles.reload")) {
             sender.sendMessage(color("&d/profiles reload &8: &7Reload the Profiles configuration"));
         }
     }
@@ -326,7 +322,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                 getMainMenu(sender);
             } else if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("reload")) {
-                    if (sender.hasPermission("profiles.admin")) {
+                    if (sender.hasPermission("profiles.reload")) {
                         this.reloadConfig();
                         sender.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("reloadConfigMessage")));
                     } else {
