@@ -1,0 +1,12 @@
+# Profiles - Configuration
+prefix: "&8[&dProfiles&8]"
+inventoryTitle: "Profiles - Main Menu"
+reloadConfigMessage: " &aSuccessfully reloaded the config!"
+noPermissionMessage: " &cYou do not have permission to use that command!"
+loadProfileMessage: " &aSuccessfully loaded saved profile!"
+saveProfileMessage: " &aSuccessfully saved profile!"
+
+# Profiles - Player Data
+# Each player will have 3 save slots stored in this file.
+# Any changes to the values in this section WILL affect the player's saved profile. Modify at your own risk!
+data:
