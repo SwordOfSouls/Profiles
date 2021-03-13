@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.1] - 03-13-2021
+
+Refactor logic to use less redundant code.
+
 ## [1.2.1] - 03-12-2021
 
 Clean up all warnings and typos in main class
