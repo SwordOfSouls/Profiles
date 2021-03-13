@@ -26,6 +26,7 @@ import java.util.*;
 public final class Profiles extends JavaPlugin implements Listener {
 
     private String pluginVersion = "";
+    private final Integer profilesInvSize = 45;
     public final ArrayList<Integer> clickedArray = new ArrayList<>(Collections.singletonList(-1));
     public static HashMap<String, ArrayList<Integer>> inventoryScheduler = new HashMap<>();
     public static BukkitSerialization bukkitSerialization = new BukkitSerialization();
@@ -63,7 +64,6 @@ public final class Profiles extends JavaPlugin implements Listener {
 
     public void openProfilesInventory(Player player) {
         UUID uuid = player.getUniqueId();
-        int profilesInvSize = 45;
         String profilesInvTitle = color(this.getConfig().getString("inventoryTitle"));
 
         Inventory profilesInv = Bukkit.createInventory(null, profilesInvSize, profilesInvTitle);
@@ -308,7 +308,12 @@ public final class Profiles extends JavaPlugin implements Listener {
         InventoryView inventoryClicked = event.getView();
 
         if (inventoryClicked.getTitle().equalsIgnoreCase(profilesInvTitle)) {
-            int configSlot = slotMapper.get(slotClicked);
+            // Check if clicked slot is outside of the 'Profiles' inventory
+            if (slotClicked >= profilesInvSize) {
+                return;
+            }
+
+            int configSlot = slotMapper.getOrDefault(slotClicked, -1);
             Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
             event.setCancelled(true);
 
