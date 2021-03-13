@@ -29,6 +29,14 @@ public final class Profiles extends JavaPlugin implements Listener {
     public final ArrayList<Integer> clickedArray = new ArrayList<>(Collections.singletonList(-1));
     public static HashMap<String, ArrayList<Integer>> inventoryScheduler = new HashMap<>();
     public static BukkitSerialization bukkitSerialization = new BukkitSerialization();
+    public static HashMap<Integer, Integer> slotMapper = new HashMap<Integer, Integer>() {{
+        put(12, 0);
+        put(13, 1);
+        put(14, 2);
+        put(30, 0);
+        put(31, 1);
+        put(32, 2);
+    }};
 
     @Override
     public void onEnable() {
@@ -94,76 +102,19 @@ public final class Profiles extends JavaPlugin implements Listener {
         for (int i = 0; i < profilesInv.getSize(); i++) {
             switch(i) {
                 case 12:
-                    if (this.getConfig().contains("data." + uuid + ".slot0")) {
-                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot0" + ".dateSaved"))));
-                        double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot0" + ".healthLevel");
-                        int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot0" + ".hungerLevel");
-                        int xpLevel = this.getConfig().getInt("data." + uuid + ".slot0" + ".experience.xpLevel");
-                        float xpPoints = (float) this.getConfig().getDouble("data." + uuid + ".slot0" + ".experience.xpPoints");
-                        String world = this.getConfig().getString("data." + uuid + ".slot0" + ".location.world");
-                        int X = (int) this.getConfig().getDouble("data." + uuid + ".slot0" + ".location.X");
-                        int Y = (int) this.getConfig().getDouble("data." + uuid + ".slot0" + ".location.Y");
-                        int Z = (int) this.getConfig().getDouble("data." + uuid + ".slot0" + ".location.Z");
-
-                        ArrayList<String> limeGlassPaneLore = new ArrayList<>();
-                        limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
-                        limeGlassPaneLore.add(color("&cRight-Click to overwrite this save slot."));
-                        limeGlassPaneLore.add(color("&e*&8-----------&e*"));
-                        limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
-                        limeGlassPaneLore.add(color("&7Health: " + "&6" + healthLevel));
-                        limeGlassPaneLore.add(color("&7Hunger: " + "&6" + hungerLevel));
-                        limeGlassPaneLore.add(color("&7XP Level: " + "&6" + xpLevel));
-                        limeGlassPaneLore.add(color("&7XP Points: " + "&6" + xpPoints));
-                        limeGlassPaneLore.add(color("&7Location: " + "&6" + world + "<" + X + " " + Y + " " + Z + ">"));
-
-                        limeGlassPaneIM.setLore(limeGlassPaneLore);
-                        limeGlassPane.setItemMeta(limeGlassPaneIM);
-                        profilesInv.setItem(i, limeGlassPane);
-                    } else {
-                        profilesInv.setItem(i, clearGlassPane);
-                    }
-                    break;
                 case 13:
-                    if (this.getConfig().contains("data." + uuid + ".slot1")) {
-                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot1" + ".dateSaved"))));
-                        double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot1" + ".healthLevel");
-                        int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot1" + ".hungerLevel");
-                        int xpLevel = this.getConfig().getInt("data." + uuid + ".slot1" + ".experience.xpLevel");
-                        float xpPoints = (float) this.getConfig().getDouble("data." + uuid + ".slot1" + ".experience.xpPoints");
-                        String world = this.getConfig().getString("data." + uuid + ".slot1" + ".location.world");
-                        int X = (int) this.getConfig().getDouble("data." + uuid + ".slot1" + ".location.X");
-                        int Y = (int) this.getConfig().getDouble("data." + uuid + ".slot1" + ".location.Y");
-                        int Z = (int) this.getConfig().getDouble("data." + uuid + ".slot1" + ".location.Z");
-
-                        ArrayList<String> limeGlassPaneLore = new ArrayList<>();
-                        limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
-                        limeGlassPaneLore.add(color("&cRight-Click to overwrite this save slot."));
-                        limeGlassPaneLore.add(color("&e*&8-----------&e*"));
-                        limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
-                        limeGlassPaneLore.add(color("&7Health: " + "&6" + healthLevel));
-                        limeGlassPaneLore.add(color("&7Hunger: " + "&6" + hungerLevel));
-                        limeGlassPaneLore.add(color("&7XP Level: " + "&6" + xpLevel));
-                        limeGlassPaneLore.add(color("&7XP Points: " + "&6" + xpPoints));
-                        limeGlassPaneLore.add(color("&7Location: " + "&6" + world + "<" + X + " " + Y + " " + Z + ">"));
-
-                        limeGlassPaneIM.setLore(limeGlassPaneLore);
-                        limeGlassPane.setItemMeta(limeGlassPaneIM);
-                        profilesInv.setItem(i, limeGlassPane);
-                    } else {
-                        profilesInv.setItem(i, clearGlassPane);
-                    }
-                    break;
                 case 14:
-                    if (this.getConfig().contains("data." + uuid + ".slot2")) {
-                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot2" + ".dateSaved"))));
-                        double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot2" + ".healthLevel");
-                        int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot2" + ".hungerLevel");
-                        int xpLevel = this.getConfig().getInt("data." + uuid + ".slot2" + ".experience.xpLevel");
-                        float xpPoints = (float) this.getConfig().getDouble("data." + uuid + ".slot2" + ".experience.xpPoints");
-                        String world = this.getConfig().getString("data." + uuid + ".slot2" + ".location.world");
-                        int X = (int) this.getConfig().getDouble("data." + uuid + ".slot2" + ".location.X");
-                        int Y = (int) this.getConfig().getDouble("data." + uuid + ".slot2" + ".location.Y");
-                        int Z = (int) this.getConfig().getDouble("data." + uuid + ".slot2" + ".location.Z");
+                    int configSlot = slotMapper.get(i);
+                    if (this.getConfig().contains("data." + uuid + ".slot" + configSlot)) {
+                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".dateSaved"))));
+                        double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".healthLevel");
+                        int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".hungerLevel");
+                        int xpLevel = this.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".experience.xpLevel");
+                        float xpPoints = (float) this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".experience.xpPoints");
+                        String world = this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".location.world");
+                        int X = (int) this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.X");
+                        int Y = (int) this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.Y");
+                        int Z = (int) this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.Z");
 
                         ArrayList<String> limeGlassPaneLore = new ArrayList<>();
                         limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
@@ -175,9 +126,9 @@ public final class Profiles extends JavaPlugin implements Listener {
                         limeGlassPaneLore.add(color("&7XP Level: " + "&6" + xpLevel));
                         limeGlassPaneLore.add(color("&7XP Points: " + "&6" + xpPoints));
                         limeGlassPaneLore.add(color("&7Location: " + "&6" + world + "<" + X + " " + Y + " " + Z + ">"));
-
                         limeGlassPaneIM.setLore(limeGlassPaneLore);
                         limeGlassPane.setItemMeta(limeGlassPaneIM);
+
                         profilesInv.setItem(i, limeGlassPane);
                     } else {
                         profilesInv.setItem(i, clearGlassPane);
@@ -357,12 +308,14 @@ public final class Profiles extends JavaPlugin implements Listener {
         InventoryView inventoryClicked = event.getView();
 
         if (inventoryClicked.getTitle().equalsIgnoreCase(profilesInvTitle)) {
+            int configSlot = slotMapper.get(slotClicked);
+            Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
             event.setCancelled(true);
 
             // Slots 12, 13, 14 will be save slots
             // If no data exists for that save, show a clearGlassPane. Otherwise, show green
             // Slots 30, 31, 32 will be delete save slots
-            if (slotClicked == 12) {
+            if (slotClicked == 12 || slotClicked == 13 || slotClicked == 14) {
                 player.setGameMode(GameMode.SURVIVAL);
 
                 // Close the Profiles inventory and remove the player from the inventory scheduler
@@ -374,92 +327,23 @@ public final class Profiles extends JavaPlugin implements Listener {
                 }
 
                 inventoryScheduler.put(player.getDisplayName(), clickedArray);
-                Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
 
                 // If the user right-clicks, we will save the profile. If they left-click, we will load.
                 // If the item is a normal glass pane, we will save the profile.
                 if (event.getClick().isRightClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    saveProfile(0, player);
+                    saveProfile(configSlot, player);
                 }
                 if (event.getClick().isLeftClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    loadProfile(0, player);
+                    loadProfile(configSlot, player);
                 }
 
                 if (itemMaterial == Material.GLASS_PANE) {
-                    saveProfile(0, player);
+                    saveProfile(configSlot, player);
                 }
                 player.closeInventory();
-            } else if (slotClicked == 13) {
-                player.setGameMode(GameMode.SURVIVAL);
-
-                // Close the Profiles inventory and remove the player from the inventory scheduler
-                if (inventoryScheduler.containsKey(player.getDisplayName())) {
-                    ArrayList<Integer> scheduleIdArray = inventoryScheduler.get(player.getDisplayName());
-                    for (Integer integer : scheduleIdArray) {
-                        Bukkit.getServer().getScheduler().cancelTask(integer);
-                    }
-                }
-
-                inventoryScheduler.put(player.getDisplayName(), clickedArray);
-                Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
-                // If the user right-clicks, we will save the profile. If they left-click, we will load.
-                // If the item is a normal glass pane, we will save the profile.
-                if (event.getClick().isRightClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    saveProfile(1, player);
-                }
-                if (event.getClick().isLeftClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    loadProfile(1, player);
-                }
-
-                if (itemMaterial == Material.GLASS_PANE) {
-                    saveProfile(1, player);
-                }
-                player.closeInventory();
-            } else if (slotClicked == 14) {
-                player.setGameMode(GameMode.SURVIVAL);
-
-                // Close the Profiles inventory and remove the player from the inventory scheduler
-                if (inventoryScheduler.containsKey(player.getDisplayName())) {
-                    ArrayList<Integer> scheduleIdArray = inventoryScheduler.get(player.getDisplayName());
-                    for (Integer integer : scheduleIdArray) {
-                        Bukkit.getServer().getScheduler().cancelTask(integer);
-                    }
-                }
-
-                inventoryScheduler.put(player.getDisplayName(), clickedArray);
-                Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
-                // If the user right-clicks, we will save the profile. If they left-click, we will load.
-                // If the item is a normal glass pane, we will save the profile.
-                if (event.getClick().isRightClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    saveProfile(2, player);
-                }
-                if (event.getClick().isLeftClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    loadProfile(2, player);
-                }
-
-                if (itemMaterial == Material.GLASS_PANE) {
-                    saveProfile(2, player);
-                }
-                player.closeInventory();
-            } else if (slotClicked == 30) {
-                // Remove slot0 section from config.yml
-                this.getConfig().set("data." + uuid + ".slot0", null);
-                this.saveConfig();
-
-                // Refresh the Profiles inventory to show removed save slot
-                inventoryScheduler.remove(player.getDisplayName());
-                player.closeInventory();
-            } else if (slotClicked == 31) {
-                // Remove slot1 section from config.yml
-                this.getConfig().set("data." + uuid + ".slot1", null);
-                this.saveConfig();
-
-                // Refresh the Profiles inventory to show removed save slot
-                inventoryScheduler.remove(player.getDisplayName());
-                player.closeInventory();
-            } else if (slotClicked == 32) {
-                // Remove slot2 section from config.yml
-                this.getConfig().set("data." + uuid + ".slot2", null);
+            } else if (slotClicked == 30 || slotClicked == 31 || slotClicked == 32) {
+                // Remove the appropriate slot section from config.yml
+                this.getConfig().set("data." + uuid + ".slot" + configSlot, null);
                 this.saveConfig();
 
                 // Refresh the Profiles inventory to show removed save slot
@@ -468,8 +352,6 @@ public final class Profiles extends JavaPlugin implements Listener {
             }
         }
     }
-
-    // Ensure player sees the Profiles inventory on join by removing from Inventory Scheduler
 
     // Clean up HashMap once player leaves the server
     @EventHandler
