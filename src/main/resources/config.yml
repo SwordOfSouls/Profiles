@@ -3,6 +3,8 @@
 # Any changes to the values in the 'data' section WILL affect the player's saved profile. Modify at your own risk!
 prefix: "&8[&dProfiles&8]"
 inventoryTitle: "Profiles - Main Menu"
+previewPlayerTitle: "Preview - Player Inventory"
+previewEnderchestTitle: "Preview - Enderchest Inventory"
 reloadConfigMessage: " &aSuccessfully reloaded the config!"
 noPermissionMessage: " &cYou do not have permission to use that command!"
 loadProfileMessage: " &aSuccessfully loaded saved profile!"

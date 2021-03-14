@@ -1,6 +1,7 @@
 package com.cmpscjg.profiles;
 
 import com.cmpscjg.profiles.utils.BukkitSerialization;
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -63,7 +64,8 @@ public final class Profiles extends JavaPlugin implements Listener {
     }
 
     public void openProfilesInventory(Player player) {
-        UUID uuid = player.getUniqueId();
+//        UUID uuid = player.getUniqueId();
+        String uuid = "9c9dae1f-e116-3398-9ce1-205f5cb6c31d";
         String profilesInvTitle = color(this.getConfig().getString("inventoryTitle"));
 
         Inventory profilesInv = Bukkit.createInventory(null, profilesInvSize, profilesInvTitle);
@@ -119,6 +121,9 @@ public final class Profiles extends JavaPlugin implements Listener {
                         ArrayList<String> limeGlassPaneLore = new ArrayList<>();
                         limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
                         limeGlassPaneLore.add(color("&cRight-Click to overwrite this save slot."));
+                        limeGlassPaneLore.add(color("&e*&8-----------&e*"));
+                        limeGlassPaneLore.add(color("&cShift Left-Click to see inventory."));
+                        limeGlassPaneLore.add(color("&cShift Right-Click to see ender chest."));
                         limeGlassPaneLore.add(color("&e*&8-----------&e*"));
                         limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
                         limeGlassPaneLore.add(color("&7Health: " + "&6" + healthLevel));
@@ -232,6 +237,49 @@ public final class Profiles extends JavaPlugin implements Listener {
         player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("loadProfileMessage")));
     }
 
+    public void previewInventory(int configSlot, Player player, boolean isLeftClick) throws IOException {
+        UUID uuid = player.getUniqueId();
+
+        // Get data to config.yml
+        String base64PlayerInventory = this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".playerInventory");
+        String base64EnderChestInventory = this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".enderChestInventory");
+
+        // Set player data
+        ItemStack[] playerInventoryContents = bukkitSerialization.itemStackArrayFromBase64(base64PlayerInventory);
+        ItemStack[] enderChestInventory = bukkitSerialization.itemStackArrayFromBase64(base64EnderChestInventory);
+        ItemStack closeButton = new ItemStack(Material.BARRIER, 1);
+        ItemMeta closeButtonIM = closeButton.getItemMeta();
+        assert closeButtonIM != null;
+        closeButtonIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        ArrayList<String> clearGlassPaneLore = new ArrayList<>();
+        clearGlassPaneLore.add(color("&fClick to return the Profiles - main menu."));
+        closeButtonIM.setLore(clearGlassPaneLore);
+        closeButton.setItemMeta(closeButtonIM);
+
+        // Show inventory as two separate pages. One for inventory and ender chest
+        String previewPlayerInvTitle = color(this.getConfig().getString("previewPlayerTitle"));
+        String previewEnderchestInvTitle = color(this.getConfig().getString("previewEnderchestTitle"));
+        Inventory previewPlayerInv = Bukkit.createInventory(null, 54, previewPlayerInvTitle);
+        previewPlayerInv.setContents(playerInventoryContents);
+        previewPlayerInv.setItem(53, closeButton);
+        Inventory previewEnderchestInv = Bukkit.createInventory(null, 36, previewEnderchestInvTitle);
+        previewEnderchestInv.setContents(enderChestInventory);
+        previewEnderchestInv.setItem(35, closeButton);
+
+        // Close the Profiles inventory and remove the player from the inventory scheduler
+        if (inventoryScheduler.containsKey(player.getDisplayName())) {
+            ArrayList<Integer> scheduleIdArray = inventoryScheduler.get(player.getDisplayName());
+            for (Integer integer : scheduleIdArray) {
+                Bukkit.getServer().getScheduler().cancelTask(integer);
+            }
+        }
+
+        inventoryScheduler.put(player.getDisplayName(), clickedArray);
+
+        player.closeInventory();
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> player.openInventory(isLeftClick ? previewPlayerInv : previewEnderchestInv), 0);
+    }
+
     // ------------------------ Commands ------------------------
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("profiles")) {
@@ -302,6 +350,8 @@ public final class Profiles extends JavaPlugin implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) throws IOException {
         String profilesInvTitle = color(this.getConfig().getString("inventoryTitle"));
+        String previewPlayerInvTitle = color(this.getConfig().getString("previewPlayerTitle"));
+        String previewEnderchestInvTitle = color(this.getConfig().getString("previewEnderchestTitle"));
         Player player = (Player) event.getWhoClicked();
         UUID uuid = player.getUniqueId();
         int slotClicked = event.getRawSlot();
@@ -333,17 +383,24 @@ public final class Profiles extends JavaPlugin implements Listener {
 
                 inventoryScheduler.put(player.getDisplayName(), clickedArray);
 
-                // If the user right-clicks, we will save the profile. If they left-click, we will load.
                 // If the item is a normal glass pane, we will save the profile.
-                if (event.getClick().isRightClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    saveProfile(configSlot, player);
-                }
-                if (event.getClick().isLeftClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    loadProfile(configSlot, player);
-                }
-
+                // If the item is a lime glass pane, there is existing save data.
+                // If the click is a shift-click, we will preview the inventories.
+                // If the click is not a shift-click, we will save/load the profile.
                 if (itemMaterial == Material.GLASS_PANE) {
                     saveProfile(configSlot, player);
+                } else if (itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
+                    if (event.getClick().isShiftClick()) {
+                        previewInventory(configSlot, player, event.getClick().isLeftClick());
+                    } else {
+                        if (event.getClick().isLeftClick()) {
+                            loadProfile(configSlot, player);
+                        }
+                        if (event.getClick().isRightClick()) {
+                            saveProfile(configSlot, player);
+                        }
+
+                    }
                 }
                 player.closeInventory();
             } else if (slotClicked == 30 || slotClicked == 31 || slotClicked == 32) {
@@ -354,6 +411,18 @@ public final class Profiles extends JavaPlugin implements Listener {
                 // Refresh the Profiles inventory to show removed save slot
                 inventoryScheduler.remove(player.getDisplayName());
                 player.closeInventory();
+            }
+        }
+
+        if (inventoryClicked.getTitle().equalsIgnoreCase(previewPlayerInvTitle) || inventoryClicked.getTitle().equalsIgnoreCase(previewEnderchestInvTitle)) {
+            // TODO: Clean up NPE when clicking empty slot in preview windows.
+            Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
+            event.setCancelled(true);
+
+            // If they click the close button, close this inventory and re-open the Profiles menu
+            if (itemMaterial == Material.BARRIER) {
+                player.closeInventory();
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> openProfilesInventory(player), 0);
             }
         }
     }
