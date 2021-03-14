@@ -19,10 +19,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-@SuppressWarnings("deprecation")
 public final class Profiles extends JavaPlugin implements Listener {
 
     private String pluginVersion = "";
@@ -106,7 +104,8 @@ public final class Profiles extends JavaPlugin implements Listener {
                 case 14:
                     int configSlot = slotMapper.get(i);
                     if (this.getConfig().contains("data." + uuid + ".slot" + configSlot)) {
-                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".dateSaved"))));
+                        // TODO: Re-visit this prettify logic.
+                        // String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".dateSaved"))));
                         double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".healthLevel");
                         int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".hungerLevel");
                         int xpLevel = this.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".experience.xpLevel");
@@ -120,7 +119,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                         limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
                         limeGlassPaneLore.add(color("&cRight-Click to overwrite this save slot."));
                         limeGlassPaneLore.add(color("&e*&8-----------&e*"));
-                        limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
+                        // limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
                         limeGlassPaneLore.add(color("&7Health: " + "&6" + healthLevel));
                         limeGlassPaneLore.add(color("&7Hunger: " + "&6" + hungerLevel));
                         limeGlassPaneLore.add(color("&7XP Level: " + "&6" + xpLevel));
