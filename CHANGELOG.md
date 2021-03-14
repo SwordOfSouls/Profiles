@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.3] - 03-14-2021
+
+Add 'fresh start' mechanic. If enabled, saving on an empty save slot will respawn player with everything reset.
+
+### Added
+- 'Fresh start' mechanic.
+- Configurable options for 'Fresh start' mechanic.
+
 ## [1.3.3] - 03-14-2021
 
 Remove prettify logic for dateSaved property. Need to figure out better implementation for CET timezone.

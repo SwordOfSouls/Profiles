@@ -18,6 +18,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -58,6 +60,20 @@ public final class Profiles extends JavaPlugin implements Listener {
         if (sender.hasPermission("profiles.reload")) {
             sender.sendMessage(color("&d/profiles reload &8: &7Reload the Profiles configuration"));
         }
+    }
+
+    public String getServerPropertiesLevelName() {
+        File serverPropertiesFile = new File("server.properties");
+        Properties serverProperties = new Properties();
+        String levelName = "";
+        try {
+            FileInputStream inputStream = new FileInputStream(serverPropertiesFile);
+            serverProperties.load(inputStream);
+            levelName = serverProperties.getProperty("level-name");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return levelName;
     }
 
     public void openProfilesInventory(Player player) {
@@ -150,9 +166,33 @@ public final class Profiles extends JavaPlugin implements Listener {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
-    public void saveProfile(int saveSlot, Player player) {
+    public void saveProfile(int saveSlot, Player player, boolean isBrandNewSave) {
         UUID uuid = player.getUniqueId();
         String playerName = player.getDisplayName();
+        boolean freshStartOnNewSave = this.getConfig().getBoolean("freshStart.freshStartOnNewSave");
+        boolean teleportToSpawnOnNewSave = this.getConfig().getBoolean("freshStart.teleportToSpawnOnNewSave");
+
+        // If save is the result of the player clicking an empty save slot, treat the save as a 'freshStart'
+        if (isBrandNewSave) {
+
+            // If enabled, clear player inventory, ender chest inventory and other player data.
+            if (freshStartOnNewSave) {
+                player.setHealth(20.0);
+                player.setFoodLevel(20);
+                player.setTotalExperience(0);
+                player.getInventory().clear();
+                player.getEnderChest().clear();
+            }
+
+            // If enabled, teleport the player to the spawn location of the main world
+            if (teleportToSpawnOnNewSave) {
+                String serverPropertiesLevelName = getServerPropertiesLevelName();
+                World defaultWorld = Bukkit.getServer().getWorld(serverPropertiesLevelName);
+                assert defaultWorld != null;
+                Location spawnPoint = defaultWorld.getSpawnLocation();
+                player.teleport(spawnPoint);
+            }
+        }
 
         String dateSaved = new Date().toString();
         double healthLevel = player.getHealth();
@@ -333,16 +373,16 @@ public final class Profiles extends JavaPlugin implements Listener {
                 inventoryScheduler.put(player.getDisplayName(), clickedArray);
 
                 // If the user right-clicks, we will save the profile. If they left-click, we will load.
-                // If the item is a normal glass pane, we will save the profile.
+                // If the item is a normal glass pane, we will create a brand new save profile.
                 if (event.getClick().isRightClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    saveProfile(configSlot, player);
+                    saveProfile(configSlot, player, false);
                 }
                 if (event.getClick().isLeftClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
                     loadProfile(configSlot, player);
                 }
 
                 if (itemMaterial == Material.GLASS_PANE) {
-                    saveProfile(configSlot, player);
+                    saveProfile(configSlot, player, true);
                 }
                 player.closeInventory();
             } else if (slotClicked == 30 || slotClicked == 31 || slotClicked == 32) {
