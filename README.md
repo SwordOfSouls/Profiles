@@ -3,8 +3,6 @@ Profiles is a plugin that allows players to save their progress to up to 3 save 
 
 <img src="https://user-images.githubusercontent.com/52573645/111053091-f218b680-842e-11eb-98a2-7701359d01c4.png" width="45%"></img> <img src="https://user-images.githubusercontent.com/52573645/111053092-f218b680-842e-11eb-8cb9-e457870230e2.png" width="45%"></img> 
 
-<img src="https://user-images.githubusercontent.com/52573645/110892715-903b3e00-82c2-11eb-892a-454c77308f43.PNG" width="90%"></img> 
-
 Features
   - Players have ability to save, load and delete up to 3 saves.
   - Each save contains the following data:
