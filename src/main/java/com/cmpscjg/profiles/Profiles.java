@@ -300,6 +300,28 @@ public final class Profiles extends JavaPlugin implements Listener {
         previewEnderchestInv.setContents(enderChestInventory);
         previewEnderchestInv.setItem(44, closeButton);
 
+        // Set empty inventory slots to stained glass item
+        ItemStack blackGlassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemMeta blackGlassPaneIM = blackGlassPane.getItemMeta();
+        assert blackGlassPaneIM != null;
+        blackGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        blackGlassPane.setItemMeta(blackGlassPaneIM);
+
+        int slotIndex = 0;
+        for (ItemStack item : previewPlayerInv.getContents()) {
+            if (item == null) {
+                previewPlayerInv.setItem(slotIndex, blackGlassPane);
+            }
+            slotIndex++;
+        }
+        slotIndex = 0;
+        for (ItemStack item : previewEnderchestInv.getContents()) {
+            if (item == null) {
+                previewEnderchestInv.setItem(slotIndex, blackGlassPane);
+            }
+            slotIndex++;
+        }
+
         // Close the Profiles inventory and remove the player from the inventory scheduler
         if (inventoryScheduler.containsKey(player.getDisplayName())) {
             ArrayList<Integer> scheduleIdArray = inventoryScheduler.get(player.getDisplayName());
@@ -392,6 +414,8 @@ public final class Profiles extends JavaPlugin implements Listener {
         InventoryView inventoryClicked = event.getView();
 
         if (inventoryClicked.getTitle().equalsIgnoreCase(profilesInvTitle)) {
+            event.setCancelled(true);
+
             // Check if clicked slot is outside of the 'Profiles' inventory
             if (slotClicked >= profilesInvSize || slotClicked == -999) {
                 return;
@@ -404,7 +428,6 @@ public final class Profiles extends JavaPlugin implements Listener {
 
             int configSlot = slotMapper.getOrDefault(slotClicked, -1);
             Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
-            event.setCancelled(true);
 
             // Slots 12, 13, 14 will be save slots
             // If no data exists for that save, show a clearGlassPane. Otherwise, show green
@@ -454,6 +477,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         }
 
         if (inventoryClicked.getTitle().equalsIgnoreCase(previewPlayerInvTitle) || inventoryClicked.getTitle().equalsIgnoreCase(previewEnderchestInvTitle)) {
+            event.setCancelled(true);
             // Check if clicked slot is outside of the 'Profiles' inventory
             if (slotClicked >= profilesInvSize || slotClicked == -999) {
                 return;
@@ -465,7 +489,6 @@ public final class Profiles extends JavaPlugin implements Listener {
             }
 
             Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
-            event.setCancelled(true);
 
             // If they click the close button, close this inventory and re-open the Profiles menu
             if (itemMaterial == Material.BARRIER) {

@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.4] - 03-14-2021
+
+Fix bug where players could add items to the preview inventories.
+
 ## [1.5.3] - 03-14-2021
 
 Add 'Preview inventory' feature.
