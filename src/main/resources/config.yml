@@ -9,4 +9,7 @@ reloadConfigMessage: " &aSuccessfully reloaded the config!"
 noPermissionMessage: " &cYou do not have permission to use that command!"
 loadProfileMessage: " &aSuccessfully loaded saved profile!"
 saveProfileMessage: " &aSuccessfully saved profile!"
+freshStart:
+  freshStartOnNewSave: true
+  teleportToSpawnOnNewSave: true
 data:

@@ -1,7 +1,6 @@
 package com.cmpscjg.profiles;
 
 import com.cmpscjg.profiles.utils.BukkitSerialization;
-import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,11 +18,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-@SuppressWarnings("deprecation")
 public final class Profiles extends JavaPlugin implements Listener {
 
     private String pluginVersion = "";
@@ -57,15 +56,28 @@ public final class Profiles extends JavaPlugin implements Listener {
     public void getMainMenu(CommandSender sender) {
         sender.sendMessage(color("&e*&8------------- &dProfiles: v" + pluginVersion + " &8-------------&e*"));
         sender.sendMessage(color("&d/profiles open &8: &7Open the Profiles main menu"));
-        
+
         if (sender.hasPermission("profiles.reload")) {
             sender.sendMessage(color("&d/profiles reload &8: &7Reload the Profiles configuration"));
         }
     }
 
+    public String getServerPropertiesLevelName() {
+        File serverPropertiesFile = new File("server.properties");
+        Properties serverProperties = new Properties();
+        String levelName = "";
+        try {
+            FileInputStream inputStream = new FileInputStream(serverPropertiesFile);
+            serverProperties.load(inputStream);
+            levelName = serverProperties.getProperty("level-name");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return levelName;
+    }
+
     public void openProfilesInventory(Player player) {
-//        UUID uuid = player.getUniqueId();
-        String uuid = "9c9dae1f-e116-3398-9ce1-205f5cb6c31d";
+        UUID uuid = player.getUniqueId();
         String profilesInvTitle = color(this.getConfig().getString("inventoryTitle"));
 
         Inventory profilesInv = Bukkit.createInventory(null, profilesInvSize, profilesInvTitle);
@@ -108,7 +120,8 @@ public final class Profiles extends JavaPlugin implements Listener {
                 case 14:
                     int configSlot = slotMapper.get(i);
                     if (this.getConfig().contains("data." + uuid + ".slot" + configSlot)) {
-                        String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".dateSaved"))));
+                        // TODO: Re-visit this prettify logic.
+                        // String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".dateSaved"))));
                         double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".healthLevel");
                         int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".hungerLevel");
                         int xpLevel = this.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".experience.xpLevel");
@@ -122,10 +135,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                         limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
                         limeGlassPaneLore.add(color("&cRight-Click to overwrite this save slot."));
                         limeGlassPaneLore.add(color("&e*&8-----------&e*"));
-                        limeGlassPaneLore.add(color("&cShift Left-Click to see inventory."));
-                        limeGlassPaneLore.add(color("&cShift Right-Click to see ender chest."));
-                        limeGlassPaneLore.add(color("&e*&8-----------&e*"));
-                        limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
+                        // limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
                         limeGlassPaneLore.add(color("&7Health: " + "&6" + healthLevel));
                         limeGlassPaneLore.add(color("&7Hunger: " + "&6" + hungerLevel));
                         limeGlassPaneLore.add(color("&7XP Level: " + "&6" + xpLevel));
@@ -156,9 +166,33 @@ public final class Profiles extends JavaPlugin implements Listener {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
-    public void saveProfile(int saveSlot, Player player) {
+    public void saveProfile(int saveSlot, Player player, boolean isBrandNewSave) {
         UUID uuid = player.getUniqueId();
         String playerName = player.getDisplayName();
+        boolean freshStartOnNewSave = this.getConfig().getBoolean("freshStart.freshStartOnNewSave");
+        boolean teleportToSpawnOnNewSave = this.getConfig().getBoolean("freshStart.teleportToSpawnOnNewSave");
+
+        // If save is the result of the player clicking an empty save slot, treat the save as a 'freshStart'
+        if (isBrandNewSave) {
+
+            // If enabled, clear player inventory, ender chest inventory and other player data.
+            if (freshStartOnNewSave) {
+                player.setHealth(20.0);
+                player.setFoodLevel(20);
+                player.setTotalExperience(0);
+                player.getInventory().clear();
+                player.getEnderChest().clear();
+            }
+
+            // If enabled, teleport the player to the spawn location of the main world
+            if (teleportToSpawnOnNewSave) {
+                String serverPropertiesLevelName = getServerPropertiesLevelName();
+                World defaultWorld = Bukkit.getServer().getWorld(serverPropertiesLevelName);
+                assert defaultWorld != null;
+                Location spawnPoint = defaultWorld.getSpawnLocation();
+                player.teleport(spawnPoint);
+            }
+        }
 
         String dateSaved = new Date().toString();
         double healthLevel = player.getHealth();
@@ -259,12 +293,12 @@ public final class Profiles extends JavaPlugin implements Listener {
         // Show inventory as two separate pages. One for inventory and ender chest
         String previewPlayerInvTitle = color(this.getConfig().getString("previewPlayerTitle"));
         String previewEnderchestInvTitle = color(this.getConfig().getString("previewEnderchestTitle"));
-        Inventory previewPlayerInv = Bukkit.createInventory(null, 54, previewPlayerInvTitle);
+        Inventory previewPlayerInv = Bukkit.createInventory(null, profilesInvSize, previewPlayerInvTitle);
         previewPlayerInv.setContents(playerInventoryContents);
-        previewPlayerInv.setItem(53, closeButton);
-        Inventory previewEnderchestInv = Bukkit.createInventory(null, 36, previewEnderchestInvTitle);
+        previewPlayerInv.setItem(44, closeButton);
+        Inventory previewEnderchestInv = Bukkit.createInventory(null, profilesInvSize, previewEnderchestInvTitle);
         previewEnderchestInv.setContents(enderChestInventory);
-        previewEnderchestInv.setItem(35, closeButton);
+        previewEnderchestInv.setItem(44, closeButton);
 
         // Close the Profiles inventory and remove the player from the inventory scheduler
         if (inventoryScheduler.containsKey(player.getDisplayName())) {
@@ -359,7 +393,12 @@ public final class Profiles extends JavaPlugin implements Listener {
 
         if (inventoryClicked.getTitle().equalsIgnoreCase(profilesInvTitle)) {
             // Check if clicked slot is outside of the 'Profiles' inventory
-            if (slotClicked >= profilesInvSize) {
+            if (slotClicked >= profilesInvSize || slotClicked == -999) {
+                return;
+            }
+
+            // Check if clicked slot is empty
+            if (inventoryClicked.getItem(slotClicked) == null) {
                 return;
             }
 
@@ -388,7 +427,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                 // If the click is a shift-click, we will preview the inventories.
                 // If the click is not a shift-click, we will save/load the profile.
                 if (itemMaterial == Material.GLASS_PANE) {
-                    saveProfile(configSlot, player);
+                    saveProfile(configSlot, player, true);
                 } else if (itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
                     if (event.getClick().isShiftClick()) {
                         previewInventory(configSlot, player, event.getClick().isLeftClick());
@@ -397,7 +436,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                             loadProfile(configSlot, player);
                         }
                         if (event.getClick().isRightClick()) {
-                            saveProfile(configSlot, player);
+                            saveProfile(configSlot, player, false);
                         }
 
                     }
@@ -415,7 +454,16 @@ public final class Profiles extends JavaPlugin implements Listener {
         }
 
         if (inventoryClicked.getTitle().equalsIgnoreCase(previewPlayerInvTitle) || inventoryClicked.getTitle().equalsIgnoreCase(previewEnderchestInvTitle)) {
-            // TODO: Clean up NPE when clicking empty slot in preview windows.
+            // Check if clicked slot is outside of the 'Profiles' inventory
+            if (slotClicked >= profilesInvSize || slotClicked == -999) {
+                return;
+            }
+
+            // Check if clicked slot is empty
+            if (inventoryClicked.getItem(slotClicked) == null) {
+                return;
+            }
+
             Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
             event.setCancelled(true);
 

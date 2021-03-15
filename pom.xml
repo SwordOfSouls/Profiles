@@ -6,7 +6,7 @@
 
     <groupId>com.CMPSCjg</groupId>
     <artifactId>Profiles</artifactId>
-    <version>1.4.2</version>
+    <version>1.5.3</version>
     <packaging>jar</packaging>
 
     <name>Profiles</name>

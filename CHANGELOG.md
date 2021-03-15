@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.3] - 03-14-2021
+
+Add 'Preview inventory' feature.
+
+### Added
+- On shift left-click of save slot, preview the saved player inventory (contents/armor).
+- On shift right-click of save slot, preview the saved player ender chest inventory.
+
+## [1.4.3] - 03-14-2021
+
+Add 'fresh start' mechanic. If enabled, saving on an empty save slot will respawn player with everything reset.
+
+### Added
+- 'Fresh start' mechanic.
+- Configurable options for 'Fresh start' mechanic.
+
+## [1.3.3] - 03-14-2021
+
+Remove prettify logic for dateSaved property. Need to figure out better implementation for CET timezone.
+
+### Changed
+- dateSaved property removed from lore text.
+
+## [1.3.2] - 03-13-2021
+
+Additional cleanup. Fix NPE for out of inventory click.
+
 ## [1.3.1] - 03-13-2021
 
 Refactor logic to use less redundant code.
