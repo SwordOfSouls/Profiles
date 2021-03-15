@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.3] - 03-14-2021
+
+Add 'Preview inventory' feature.
+
+### Added
+- On shift left-click of save slot, preview the saved player inventory (contents/armor).
+- On shift right-click of save slot, preview the saved player ender chest inventory.
+
 ## [1.4.3] - 03-14-2021
 
 Add 'fresh start' mechanic. If enabled, saving on an empty save slot will respawn player with everything reset.

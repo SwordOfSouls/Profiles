@@ -56,7 +56,7 @@ public final class Profiles extends JavaPlugin implements Listener {
     public void getMainMenu(CommandSender sender) {
         sender.sendMessage(color("&e*&8------------- &dProfiles: v" + pluginVersion + " &8-------------&e*"));
         sender.sendMessage(color("&d/profiles open &8: &7Open the Profiles main menu"));
-        
+
         if (sender.hasPermission("profiles.reload")) {
             sender.sendMessage(color("&d/profiles reload &8: &7Reload the Profiles configuration"));
         }
@@ -271,6 +271,49 @@ public final class Profiles extends JavaPlugin implements Listener {
         player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("loadProfileMessage")));
     }
 
+    public void previewInventory(int configSlot, Player player, boolean isLeftClick) throws IOException {
+        UUID uuid = player.getUniqueId();
+
+        // Get data to config.yml
+        String base64PlayerInventory = this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".playerInventory");
+        String base64EnderChestInventory = this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".enderChestInventory");
+
+        // Set player data
+        ItemStack[] playerInventoryContents = bukkitSerialization.itemStackArrayFromBase64(base64PlayerInventory);
+        ItemStack[] enderChestInventory = bukkitSerialization.itemStackArrayFromBase64(base64EnderChestInventory);
+        ItemStack closeButton = new ItemStack(Material.BARRIER, 1);
+        ItemMeta closeButtonIM = closeButton.getItemMeta();
+        assert closeButtonIM != null;
+        closeButtonIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        ArrayList<String> clearGlassPaneLore = new ArrayList<>();
+        clearGlassPaneLore.add(color("&fClick to return the Profiles - main menu."));
+        closeButtonIM.setLore(clearGlassPaneLore);
+        closeButton.setItemMeta(closeButtonIM);
+
+        // Show inventory as two separate pages. One for inventory and ender chest
+        String previewPlayerInvTitle = color(this.getConfig().getString("previewPlayerTitle"));
+        String previewEnderchestInvTitle = color(this.getConfig().getString("previewEnderchestTitle"));
+        Inventory previewPlayerInv = Bukkit.createInventory(null, profilesInvSize, previewPlayerInvTitle);
+        previewPlayerInv.setContents(playerInventoryContents);
+        previewPlayerInv.setItem(44, closeButton);
+        Inventory previewEnderchestInv = Bukkit.createInventory(null, profilesInvSize, previewEnderchestInvTitle);
+        previewEnderchestInv.setContents(enderChestInventory);
+        previewEnderchestInv.setItem(44, closeButton);
+
+        // Close the Profiles inventory and remove the player from the inventory scheduler
+        if (inventoryScheduler.containsKey(player.getDisplayName())) {
+            ArrayList<Integer> scheduleIdArray = inventoryScheduler.get(player.getDisplayName());
+            for (Integer integer : scheduleIdArray) {
+                Bukkit.getServer().getScheduler().cancelTask(integer);
+            }
+        }
+
+        inventoryScheduler.put(player.getDisplayName(), clickedArray);
+
+        player.closeInventory();
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> player.openInventory(isLeftClick ? previewPlayerInv : previewEnderchestInv), 0);
+    }
+
     // ------------------------ Commands ------------------------
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("profiles")) {
@@ -341,6 +384,8 @@ public final class Profiles extends JavaPlugin implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) throws IOException {
         String profilesInvTitle = color(this.getConfig().getString("inventoryTitle"));
+        String previewPlayerInvTitle = color(this.getConfig().getString("previewPlayerTitle"));
+        String previewEnderchestInvTitle = color(this.getConfig().getString("previewEnderchestTitle"));
         Player player = (Player) event.getWhoClicked();
         UUID uuid = player.getUniqueId();
         int slotClicked = event.getRawSlot();
@@ -348,7 +393,12 @@ public final class Profiles extends JavaPlugin implements Listener {
 
         if (inventoryClicked.getTitle().equalsIgnoreCase(profilesInvTitle)) {
             // Check if clicked slot is outside of the 'Profiles' inventory
-            if (slotClicked >= profilesInvSize) {
+            if (slotClicked >= profilesInvSize || slotClicked == -999) {
+                return;
+            }
+
+            // Check if clicked slot is empty
+            if (inventoryClicked.getItem(slotClicked) == null) {
                 return;
             }
 
@@ -372,17 +422,24 @@ public final class Profiles extends JavaPlugin implements Listener {
 
                 inventoryScheduler.put(player.getDisplayName(), clickedArray);
 
-                // If the user right-clicks, we will save the profile. If they left-click, we will load.
-                // If the item is a normal glass pane, we will create a brand new save profile.
-                if (event.getClick().isRightClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    saveProfile(configSlot, player, false);
-                }
-                if (event.getClick().isLeftClick() && itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
-                    loadProfile(configSlot, player);
-                }
-
+                // If the item is a normal glass pane, we will save the profile.
+                // If the item is a lime glass pane, there is existing save data.
+                // If the click is a shift-click, we will preview the inventories.
+                // If the click is not a shift-click, we will save/load the profile.
                 if (itemMaterial == Material.GLASS_PANE) {
                     saveProfile(configSlot, player, true);
+                } else if (itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
+                    if (event.getClick().isShiftClick()) {
+                        previewInventory(configSlot, player, event.getClick().isLeftClick());
+                    } else {
+                        if (event.getClick().isLeftClick()) {
+                            loadProfile(configSlot, player);
+                        }
+                        if (event.getClick().isRightClick()) {
+                            saveProfile(configSlot, player, false);
+                        }
+
+                    }
                 }
                 player.closeInventory();
             } else if (slotClicked == 30 || slotClicked == 31 || slotClicked == 32) {
@@ -393,6 +450,27 @@ public final class Profiles extends JavaPlugin implements Listener {
                 // Refresh the Profiles inventory to show removed save slot
                 inventoryScheduler.remove(player.getDisplayName());
                 player.closeInventory();
+            }
+        }
+
+        if (inventoryClicked.getTitle().equalsIgnoreCase(previewPlayerInvTitle) || inventoryClicked.getTitle().equalsIgnoreCase(previewEnderchestInvTitle)) {
+            // Check if clicked slot is outside of the 'Profiles' inventory
+            if (slotClicked >= profilesInvSize || slotClicked == -999) {
+                return;
+            }
+
+            // Check if clicked slot is empty
+            if (inventoryClicked.getItem(slotClicked) == null) {
+                return;
+            }
+
+            Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
+            event.setCancelled(true);
+
+            // If they click the close button, close this inventory and re-open the Profiles menu
+            if (itemMaterial == Material.BARRIER) {
+                player.closeInventory();
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> openProfilesInventory(player), 0);
             }
         }
     }
