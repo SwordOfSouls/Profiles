@@ -135,6 +135,9 @@ public final class Profiles extends JavaPlugin implements Listener {
                         limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
                         limeGlassPaneLore.add(color("&cRight-Click to overwrite this save slot."));
                         limeGlassPaneLore.add(color("&e*&8-----------&e*"));
+                        limeGlassPaneLore.add(color("&cShift Left-Click to see inventory."));
+                        limeGlassPaneLore.add(color("&cShift Right-Click to see ender chest."));
+                        limeGlassPaneLore.add(color("&e*&8-----------&e*"));
                         // limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
                         limeGlassPaneLore.add(color("&7Health: " + "&6" + healthLevel));
                         limeGlassPaneLore.add(color("&7Hunger: " + "&6" + hungerLevel));
@@ -256,7 +259,6 @@ public final class Profiles extends JavaPlugin implements Listener {
         player.getInventory().setContents(playerInventory);
         player.getInventory().setArmorContents(playerArmor);
         player.getEnderChest().setContents(enderChestInventory);
-        player.updateInventory();
         player.setHealth(healthLevel);
         player.setFoodLevel(hungerLevel);
         player.setLevel(xpLevel);
@@ -374,7 +376,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         player.setGameMode(GameMode.SPECTATOR);
 
         // Open the Profiles inventory
-        openProfilesInventory(player);
+        Bukkit.getScheduler().runTaskLater(this, () -> openProfilesInventory(player), 0);
     }
 
     // Prevent player from closing Profiles inventory
