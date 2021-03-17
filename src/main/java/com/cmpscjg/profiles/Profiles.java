@@ -38,6 +38,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         put(31, 1);
         put(32, 2);
     }};
+    public static HashMap<String, Integer> currentSlotMapper = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -50,6 +51,14 @@ public final class Profiles extends JavaPlugin implements Listener {
 
         // Register main class events
         this.getServer().getPluginManager().registerEvents(this, this);
+    }
+
+    @Override
+    public void onDisable() {
+        boolean shouldSaveOnPlayerLeave = this.getConfig().getBoolean("shouldSaveOnPlayerLeave");
+        if (shouldSaveOnPlayerLeave) {
+            Bukkit.broadcastMessage(color(this.getConfig().getString("prefix") + " &c Since the server has been reloaded, the saveOnPlayerLeave feature will not work as intended. Please manually save your profile before leaving!"));
+        }
     }
 
     // ------------------------ Utils ------------------------
@@ -231,8 +240,11 @@ public final class Profiles extends JavaPlugin implements Listener {
         // Save data to config.yml
         this.saveConfig();
 
+        // Store which slot the player saved to. Making it the current slot
+        currentSlotMapper.put(player.getDisplayName(), saveSlot);
+
         // Send a message to the player stating the save was successful
-        player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("saveProfileMessage")));
+        player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("saveProfileMessage").replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot))));
     }
 
     public void loadProfile(int saveSlot, Player player) throws IOException {
@@ -270,7 +282,10 @@ public final class Profiles extends JavaPlugin implements Listener {
         Location savedLocation = new Location(fullWorld, X, Y, Z);
         player.teleport(savedLocation);
 
-        player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("loadProfileMessage")));
+        // Store which slot the player has loaded. Making it the current slot
+        currentSlotMapper.put(player.getDisplayName(), saveSlot);
+
+        player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("loadProfileMessage").replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot))));
     }
 
     public void previewInventory(int configSlot, Player player, boolean isLeftClick) throws IOException {
@@ -504,6 +519,23 @@ public final class Profiles extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        boolean shouldSaveOnPlayerLeave = this.getConfig().getBoolean("shouldSaveOnPlayerLeave");
+
+        // Get the current Profile slot that the player last interacted with (either through saving or loading)
+        // TODO: This should work as long as the server is not being stopped/reset.
+        //       In a future update, we should persist this somehow.
+        int currentProfileSlot = -1;
+        if (currentSlotMapper.containsKey(player.getDisplayName())) {
+            currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
+        }
+
+        // If enabled, save the current Profile slot if defined. Then, remove player from HashMap
+        if (shouldSaveOnPlayerLeave && currentProfileSlot != -1) {
+            saveProfile(currentProfileSlot, player, false);
+            currentSlotMapper.remove(player.getDisplayName());
+        }
+
+        // Remove player from HashMap
         inventoryScheduler.remove(player.getDisplayName());
     }
 
