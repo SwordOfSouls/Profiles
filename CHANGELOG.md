@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.5] - 03-17-2021
+
+Add 'Save on Player leave' feature.
+
+### Added
+- Added 'shouldSaveOnPlayerLeave' configuration option.
+- Updated load / save profile messages to indicate which slot they are on.
+
 ## [1.5.5] - 03-16-2021
 
 Fix bug where players would not see items render in inventory on load

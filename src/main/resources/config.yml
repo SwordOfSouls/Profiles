@@ -7,9 +7,10 @@ previewPlayerTitle: "Preview - Player Inventory"
 previewEnderchestTitle: "Preview - Enderchest Inventory"
 reloadConfigMessage: " &aSuccessfully reloaded the config!"
 noPermissionMessage: " &cYou do not have permission to use that command!"
-loadProfileMessage: " &aSuccessfully loaded saved profile!"
-saveProfileMessage: " &aSuccessfully saved profile!"
+loadProfileMessage: " &aSuccessfully loaded saved profile on slot #<SLOT_NUMBER>!"
+saveProfileMessage: " &aSuccessfully saved profile on slot #<SLOT_NUMBER>!"
 freshStart:
   freshStartOnNewSave: true
   teleportToSpawnOnNewSave: true
+shouldSaveOnPlayerLeave: true
 data:
