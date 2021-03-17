@@ -263,6 +263,24 @@ public final class Profiles extends JavaPlugin implements Listener {
         double Y = this.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".location.Y");
         double Z = this.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".location.Z");
 
+        // Clean incoming data from config.yml to prevent errors
+        // Assign properties to default Minecraft starting values if bad data exists.
+        if (healthLevel < 0.0 || healthLevel > 20.0) {
+            healthLevel = 20.0;
+        }
+
+        if (hungerLevel < 0 || hungerLevel > 20) {
+            hungerLevel = 20;
+        }
+
+        if (xpLevel < 0 || xpLevel > Integer.MAX_VALUE) {
+            xpLevel = 0;
+        }
+
+        if (xpPoints < 0.0 || xpPoints > 1.0) {
+            xpPoints = 0;
+        }
+
         // Set player data
         ItemStack[] playerInventory = bukkitSerialization.itemStackArrayFromBase64(base64PlayerInventory);
         ItemStack[] playerArmor = bukkitSerialization.itemStackArrayFromBase64(base64PlayerArmor);

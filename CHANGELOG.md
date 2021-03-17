@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.6] - 03-17-2021
+
+Clean unsafe data before loading the profile.
+
+### Fixed
+- IllegalArgumentException when unsafe values for health, hunger, xpLevel and xpPoints were provided from config.yml.
+
 ## [1.6.5] - 03-17-2021
 
 Add 'Save on Player leave' feature.
