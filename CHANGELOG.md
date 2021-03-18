@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.6] - 03-18-2021
+
+Auto save the Profile when the players inventory changes (ideally fixing most dupe issues)
+
 ## [1.6.6] - 03-17-2021
 
 Clean unsafe data before loading the profile.

@@ -7,11 +7,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -39,6 +38,12 @@ public final class Profiles extends JavaPlugin implements Listener {
         put(32, 2);
     }};
     public static HashMap<String, Integer> currentSlotMapper = new HashMap<>();
+
+    enum SaveTypeEnum {
+        NEW,
+        EXISTING,
+        AUTO
+    }
 
     @Override
     public void onEnable() {
@@ -178,14 +183,14 @@ public final class Profiles extends JavaPlugin implements Listener {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
-    public void saveProfile(int saveSlot, Player player, boolean isBrandNewSave) {
+    public void saveProfile(int saveSlot, Player player, SaveTypeEnum saveType) {
         UUID uuid = player.getUniqueId();
         String playerName = player.getDisplayName();
         boolean freshStartOnNewSave = this.getConfig().getBoolean("freshStart.freshStartOnNewSave");
         boolean teleportToSpawnOnNewSave = this.getConfig().getBoolean("freshStart.teleportToSpawnOnNewSave");
 
         // If save is the result of the player clicking an empty save slot, treat the save as a 'freshStart'
-        if (isBrandNewSave) {
+        if (saveType == SaveTypeEnum.NEW) {
 
             // If enabled, clear player inventory, ender chest inventory and other player data.
             if (freshStartOnNewSave) {
@@ -244,7 +249,9 @@ public final class Profiles extends JavaPlugin implements Listener {
         currentSlotMapper.put(player.getDisplayName(), saveSlot);
 
         // Send a message to the player stating the save was successful
-        player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("saveProfileMessage").replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot))));
+        if (saveType != SaveTypeEnum.AUTO) {
+            player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("saveProfileMessage").replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot))));
+        }
     }
 
     public void loadProfile(int saveSlot, Player player) throws IOException {
@@ -435,6 +442,15 @@ public final class Profiles extends JavaPlugin implements Listener {
             schedulerIdArray.add(schedulerId);
             inventoryScheduler.put(player.getDisplayName(), schedulerIdArray);
         }
+
+        // Since we are force closing an inventory, this event will fire constantly.
+        // Meaning, we can just invoke the saveProfile method here.
+        // TODO: Need to find all inventories that return items on close and do not auto
+        int currentProfileSlot = -1;
+        if (currentSlotMapper.containsKey(player.getDisplayName())) {
+            currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
+            saveProfile(currentProfileSlot, player, SaveTypeEnum.AUTO);
+        }
     }
 
     // Prevent player from clicking and removing items from Profiles inventory
@@ -448,6 +464,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         int slotClicked = event.getRawSlot();
         InventoryView inventoryClicked = event.getView();
 
+        // Profiles inventory
         if (inventoryClicked.getTitle().equalsIgnoreCase(profilesInvTitle)) {
             event.setCancelled(true);
 
@@ -485,7 +502,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                 // If the click is a shift-click, we will preview the inventories.
                 // If the click is not a shift-click, we will save/load the profile.
                 if (itemMaterial == Material.GLASS_PANE) {
-                    saveProfile(configSlot, player, true);
+                    saveProfile(configSlot, player, SaveTypeEnum.NEW);
                 } else if (itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
                     if (event.getClick().isShiftClick()) {
                         previewInventory(configSlot, player, event.getClick().isLeftClick());
@@ -494,7 +511,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                             loadProfile(configSlot, player);
                         }
                         if (event.getClick().isRightClick()) {
-                            saveProfile(configSlot, player, false);
+                            saveProfile(configSlot, player, SaveTypeEnum.EXISTING);
                         }
 
                     }
@@ -511,6 +528,7 @@ public final class Profiles extends JavaPlugin implements Listener {
             }
         }
 
+        // Preview inventory
         if (inventoryClicked.getTitle().equalsIgnoreCase(previewPlayerInvTitle) || inventoryClicked.getTitle().equalsIgnoreCase(previewEnderchestInvTitle)) {
             event.setCancelled(true);
             // Check if clicked slot is outside of the 'Profiles' inventory
@@ -531,6 +549,12 @@ public final class Profiles extends JavaPlugin implements Listener {
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> openProfilesInventory(player), 0);
             }
         }
+
+        // Auto save the Player's Profile when they put an item into an inventory
+        // Chest actions - MOVE_TO_OTHER_INVENTORY, PLACE_ALL
+        // Inventory titles - Chest, Ender Chest, Furnace, Blast Furnace, Minecart with Chest, Item Hopper
+        // Repair & Name, Enchant, Crafting, Large Chest
+        // if (clickAction == InventoryAction.MOVE_TO_OTHER_INVENTORY || clickAction == InventoryAction.PLACE_ALL)
     }
 
     // Clean up HashMap once player leaves the server
@@ -538,6 +562,9 @@ public final class Profiles extends JavaPlugin implements Listener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         boolean shouldSaveOnPlayerLeave = this.getConfig().getBoolean("shouldSaveOnPlayerLeave");
+
+        // Close any open inventory to kick off auto save.
+        player.closeInventory();
 
         // Get the current Profile slot that the player last interacted with (either through saving or loading)
         // TODO: This should work as long as the server is not being stopped/reset.
@@ -549,7 +576,7 @@ public final class Profiles extends JavaPlugin implements Listener {
 
         // If enabled, save the current Profile slot if defined. Then, remove player from HashMap
         if (shouldSaveOnPlayerLeave && currentProfileSlot != -1) {
-            saveProfile(currentProfileSlot, player, false);
+            saveProfile(currentProfileSlot, player, SaveTypeEnum.AUTO);
             currentSlotMapper.remove(player.getDisplayName());
         }
 
@@ -566,6 +593,67 @@ public final class Profiles extends JavaPlugin implements Listener {
 
         if (inventoryOpened.getTitle().equalsIgnoreCase(profilesInvTitle)) {
             event.setCancelled(true);
+        }
+    }
+
+    // Auto save the Player's Profile when they pick up a new item
+    @EventHandler
+    public void onPlayerPickup(EntityPickupItemEvent event) {
+        Player player = null;
+
+        // Ensure entity is a player before casting it as such
+        if (event.getEntity() instanceof Player) {
+            player = (Player) event.getEntity();
+            int currentProfileSlot = -1;
+            if (currentSlotMapper.containsKey(player.getDisplayName())) {
+                currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
+                int finalCurrentProfileSlot = currentProfileSlot;
+                Player finalPlayer = player;
+                Bukkit.getScheduler().runTaskLater(this, () ->
+                        saveProfile(finalCurrentProfileSlot, finalPlayer, SaveTypeEnum.AUTO), 0);
+            }
+        }
+    }
+
+    // Auto save the Player's Profile when they drop an item
+    @EventHandler
+    public void onPlayerDrop(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+
+        int currentProfileSlot = -1;
+        if (currentSlotMapper.containsKey(player.getDisplayName())) {
+            currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
+            saveProfile(currentProfileSlot, player, SaveTypeEnum.AUTO);
+        }
+    }
+
+    // Auto save the Player's Profile when they break an item
+    @EventHandler
+    public void onPlayerBreakItem(PlayerItemBreakEvent event) {
+        Player player = event.getPlayer();
+
+        int currentProfileSlot = -1;
+        if (currentSlotMapper.containsKey(player.getDisplayName())) {
+            currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
+            int finalCurrentProfileSlot = currentProfileSlot;
+            Player finalPlayer = player;
+            Bukkit.getScheduler().runTaskLater(this, () ->
+                    saveProfile(finalCurrentProfileSlot, finalPlayer, SaveTypeEnum.AUTO), 0);
+        }
+    }
+
+    // Auto save the Player's Profile when they consume an item
+    @EventHandler
+    public void onPlayerConsumeItem(PlayerItemConsumeEvent event) {
+        Player player = event.getPlayer();
+
+        int currentProfileSlot = -1;
+        if (currentSlotMapper.containsKey(player.getDisplayName())) {
+            currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
+            int finalCurrentProfileSlot = currentProfileSlot;
+            Player finalPlayer = player;
+            Bukkit.getScheduler().runTaskLater(this, () ->
+                    saveProfile(finalCurrentProfileSlot, finalPlayer, SaveTypeEnum.AUTO), 0);
         }
     }
 }
