@@ -9,6 +9,10 @@ reloadConfigMessage: " &aSuccessfully reloaded the config!"
 noPermissionMessage: " &cYou do not have permission to use that command!"
 loadProfileMessage: " &aSuccessfully loaded saved profile on slot #<SLOT_NUMBER>!"
 saveProfileMessage: " &aSuccessfully saved profile on slot #<SLOT_NUMBER>!"
+deleteProfileMessage: " &aSuccessfully deleted profile on slot #<SLOT_NUMBER>!"
+saveDoesNotExistOnSlotMessage: " &cYou do not have a save on slot #<SLOT_NUMBER>!"
+invalidSlotMessage: " &cSlot #<SLOT_NUMBER> is not a valid save slot!"
+
 freshStart:
   freshStartOnNewSave: true
   teleportToSpawnOnNewSave: true
