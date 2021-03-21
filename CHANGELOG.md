@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.7] - 03-18-2021
+
+Found issue where auto save was being invoked when player died. Emptying inventory, setting health to 0, etc.
+
+### Fixed
+- Added check if inventory is a 'Crafting' table before trying to auto-save.
+- Added open/close logic on leave to force auto save.
+
 ## [1.7.6] - 03-18-2021
 
 Auto save the Profile when the players inventory changes (ideally fixing most dupe issues)

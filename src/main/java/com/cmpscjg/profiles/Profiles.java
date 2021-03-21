@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -445,9 +446,9 @@ public final class Profiles extends JavaPlugin implements Listener {
 
         // Since we are force closing an inventory, this event will fire constantly.
         // Meaning, we can just invoke the saveProfile method here.
-        // TODO: Need to find all inventories that return items on close and do not auto
+        // TODO: Need to find all inventories that return items on close and do not auto save
         int currentProfileSlot = -1;
-        if (currentSlotMapper.containsKey(player.getDisplayName())) {
+        if (!inventoryClosed.getTitle().equalsIgnoreCase("Crafting") && currentSlotMapper.containsKey(player.getDisplayName())) {
             currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
             saveProfile(currentProfileSlot, player, SaveTypeEnum.AUTO);
         }
@@ -563,7 +564,9 @@ public final class Profiles extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         boolean shouldSaveOnPlayerLeave = this.getConfig().getBoolean("shouldSaveOnPlayerLeave");
 
+        // TODO: This is really hacky.
         // Close any open inventory to kick off auto save.
+        player.openInventory(Bukkit.createInventory(null, 18, "Profiles - Inventory"));
         player.closeInventory();
 
         // Get the current Profile slot that the player last interacted with (either through saving or loading)
