@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.7] - 03-21-2021
+
+Extend save, load and delete functionality to command-line.
+
+### Fixed
+- Bug where the delete functionality would cause a profile to be auto saved.
+
 ## [1.7.7] - 03-18-2021
 
 Found issue where auto save was being invoked when player died. Emptying inventory, setting health to 0, etc.

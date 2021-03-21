@@ -71,6 +71,10 @@ public final class Profiles extends JavaPlugin implements Listener {
     public void getMainMenu(CommandSender sender) {
         sender.sendMessage(color("&e*&8------------- &dProfiles: v" + pluginVersion + " &8-------------&e*"));
         sender.sendMessage(color("&d/profiles open &8: &7Open the Profiles main menu"));
+        sender.sendMessage(color("&d/profiles save <0 - 1 - 2>: &7Save your progress into a slot"));
+        sender.sendMessage(color("&d/profiles load <0 - 1 - 2>: &7Load your progress from an existing save"));
+        sender.sendMessage(color("&d/profiles delete <0 - 1 - 2>: &7Delete your progress from a slot"));
+
 
         if (sender.hasPermission("profiles.reload")) {
             sender.sendMessage(color("&d/profiles reload &8: &7Reload the Profiles configuration"));
@@ -257,6 +261,14 @@ public final class Profiles extends JavaPlugin implements Listener {
 
     public void loadProfile(int saveSlot, Player player) throws IOException {
         UUID uuid = player.getUniqueId();
+        String saveDoesNotExistOnSlotMessage = this.getConfig().getString("saveDoesNotExistOnSlotMessage");
+        saveDoesNotExistOnSlotMessage = saveDoesNotExistOnSlotMessage.replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot));
+
+        // Check if save data does not exist for the provided slot
+        if (!this.getConfig().contains("data." + uuid + ".slot" + saveSlot)) {
+            player.sendMessage(color(this.getConfig().getString("prefix") + saveDoesNotExistOnSlotMessage));
+            return;
+        }
 
         // Get data to config.yml
         double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".healthLevel");
@@ -312,6 +324,18 @@ public final class Profiles extends JavaPlugin implements Listener {
         currentSlotMapper.put(player.getDisplayName(), saveSlot);
 
         player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("loadProfileMessage").replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot))));
+    }
+
+    public void deleteProfile(int saveSlot, Player player) {
+        UUID uuid = player.getUniqueId();
+        String deleteProfileMessage = this.getConfig().getString("deleteProfileMessage");
+        deleteProfileMessage = deleteProfileMessage.replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot));
+
+        // Remove the appropriate slot section from config.yml
+        this.getConfig().set("data." + uuid + ".slot" + Integer.toString(saveSlot), null);
+        this.saveConfig();
+
+        player.sendMessage(color(this.getConfig().getString("prefix") + deleteProfileMessage));
     }
 
     public void previewInventory(int configSlot, Player player, boolean isLeftClick) throws IOException {
@@ -401,6 +425,33 @@ public final class Profiles extends JavaPlugin implements Listener {
                         sender.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("noPermissionMessage")));
                     }
                 }
+            } else if (args.length == 2) {
+                int slotProvided = -1;
+                try {
+                    if (sender instanceof Player) {
+                        Player player = (Player) sender;
+                        // Ensure the provided slot is the string-equivalent of 0, 1, 2
+                        // TODO: From a user perspective, 1, 2, 3 makes more sense
+                        slotProvided = Integer.parseInt(args[1]);
+                        if (slotProvided < 0 || slotProvided > 2) {
+                            String invalidSlotMessage = this.getConfig().getString("invalidSlotMessage");
+                            invalidSlotMessage = invalidSlotMessage.replaceAll("<SLOT_NUMBER>", Integer.toString(slotProvided));
+                            player.sendMessage(color(this.getConfig().getString("prefix") + invalidSlotMessage));
+                        } else {
+                            if (args[0].equalsIgnoreCase("save")) {
+                                boolean doesSaveExist = this.getConfig().contains("data." + player.getUniqueId() + ".slot" + slotProvided);
+                                saveProfile(slotProvided, player, doesSaveExist ? SaveTypeEnum.EXISTING : SaveTypeEnum.NEW);
+                            } else if (args[0].equalsIgnoreCase("load")) {
+                                loadProfile(slotProvided, player);
+                            } else if (args[0].equalsIgnoreCase("delete")) {
+                                deleteProfile(slotProvided, player);
+                            }
+                        }
+                    } else {
+                        sender.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("noPermissionMessage")));
+                    }
+                } catch (NumberFormatException | IOException e) {
+                }
             }
         }
         return true;
@@ -448,7 +499,9 @@ public final class Profiles extends JavaPlugin implements Listener {
         // Meaning, we can just invoke the saveProfile method here.
         // TODO: Need to find all inventories that return items on close and do not auto save
         int currentProfileSlot = -1;
-        if (!inventoryClosed.getTitle().equalsIgnoreCase("Crafting") && currentSlotMapper.containsKey(player.getDisplayName())) {
+        if (!inventoryClosed.getTitle().equalsIgnoreCase("Crafting") &&
+                !inventoryClosed.getTitle().equalsIgnoreCase(profilesInvTitle) &&
+                currentSlotMapper.containsKey(player.getDisplayName())) {
             currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
             saveProfile(currentProfileSlot, player, SaveTypeEnum.AUTO);
         }
@@ -519,9 +572,8 @@ public final class Profiles extends JavaPlugin implements Listener {
                 }
                 player.closeInventory();
             } else if (slotClicked == 30 || slotClicked == 31 || slotClicked == 32) {
-                // Remove the appropriate slot section from config.yml
-                this.getConfig().set("data." + uuid + ".slot" + configSlot, null);
-                this.saveConfig();
+                // Delete the corresponding Profile slot
+                deleteProfile(slotMapper.get(slotClicked), player);
 
                 // Refresh the Profiles inventory to show removed save slot
                 inventoryScheduler.remove(player.getDisplayName());
