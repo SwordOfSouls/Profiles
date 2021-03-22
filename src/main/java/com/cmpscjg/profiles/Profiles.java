@@ -193,6 +193,12 @@ public final class Profiles extends JavaPlugin implements Listener {
         String playerName = player.getDisplayName();
         boolean freshStartOnNewSave = this.getConfig().getBoolean("freshStart.freshStartOnNewSave");
         boolean teleportToSpawnOnNewSave = this.getConfig().getBoolean("freshStart.teleportToSpawnOnNewSave");
+        List<String> commandsToDispatchOnSave = new ArrayList<>();
+
+        // Check if commands are defined for the provided slot
+        if (this.getConfig().contains("commands.onSave.slot" + saveSlot)) {
+            commandsToDispatchOnSave = (List<String>) this.getConfig().getList("commands.onSave.slot" + saveSlot);
+        }
 
         // If save is the result of the player clicking an empty save slot, treat the save as a 'freshStart'
         if (saveType == SaveTypeEnum.NEW) {
@@ -253,6 +259,16 @@ public final class Profiles extends JavaPlugin implements Listener {
         // Store which slot the player saved to. Making it the current slot
         currentSlotMapper.put(player.getDisplayName(), saveSlot);
 
+        // Dispatch any and all commands defined for the save slot
+        if (commandsToDispatchOnSave != null && saveType != SaveTypeEnum.AUTO) {
+            for (String command : commandsToDispatchOnSave) {
+                if (command != null) {
+                    command = command.replaceAll("<PLAYER>", player.getDisplayName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                }
+            }
+        }
+
         // Send a message to the player stating the save was successful
         if (saveType != SaveTypeEnum.AUTO) {
             player.sendMessage(color(this.getConfig().getString("prefix") + this.getConfig().getString("saveProfileMessage").replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot))));
@@ -261,8 +277,14 @@ public final class Profiles extends JavaPlugin implements Listener {
 
     public void loadProfile(int saveSlot, Player player) throws IOException {
         UUID uuid = player.getUniqueId();
+        List<String> commandsToDispatchOnLoad = new ArrayList<>();
         String saveDoesNotExistOnSlotMessage = this.getConfig().getString("saveDoesNotExistOnSlotMessage");
         saveDoesNotExistOnSlotMessage = saveDoesNotExistOnSlotMessage.replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot));
+
+        // Check if commands are defined for the provided slot
+        if (this.getConfig().contains("commands.onLoad.slot" + saveSlot)) {
+            commandsToDispatchOnLoad = (List<String>) this.getConfig().getList("commands.onLoad.slot" + saveSlot);
+        }
 
         // Check if save data does not exist for the provided slot
         if (!this.getConfig().contains("data." + uuid + ".slot" + saveSlot)) {
@@ -320,6 +342,16 @@ public final class Profiles extends JavaPlugin implements Listener {
         Location savedLocation = new Location(fullWorld, X, Y, Z);
         player.teleport(savedLocation);
 
+        // Dispatch any and all commands defined for the save slot
+        if (commandsToDispatchOnLoad != null) {
+            for (String command : commandsToDispatchOnLoad) {
+                if (command != null) {
+                    command = command.replaceAll("<PLAYER>", player.getDisplayName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                }
+            }
+        }
+
         // Store which slot the player has loaded. Making it the current slot
         currentSlotMapper.put(player.getDisplayName(), saveSlot);
 
@@ -328,12 +360,28 @@ public final class Profiles extends JavaPlugin implements Listener {
 
     public void deleteProfile(int saveSlot, Player player) {
         UUID uuid = player.getUniqueId();
+        List<String> commandsToDispatchOnDelete = new ArrayList<>();
         String deleteProfileMessage = this.getConfig().getString("deleteProfileMessage");
         deleteProfileMessage = deleteProfileMessage.replaceAll("<SLOT_NUMBER>", Integer.toString(saveSlot));
+
+        // Check if commands are defined for the provided slot
+        if (this.getConfig().contains("commands.onDelete.slot" + saveSlot)) {
+            commandsToDispatchOnDelete = (List<String>) this.getConfig().getList("commands.onDelete.slot" + saveSlot);
+        }
 
         // Remove the appropriate slot section from config.yml
         this.getConfig().set("data." + uuid + ".slot" + Integer.toString(saveSlot), null);
         this.saveConfig();
+
+        // Dispatch any and all commands defined for the save slot
+        if (commandsToDispatchOnDelete != null) {
+            for (String command : commandsToDispatchOnDelete) {
+                if (command != null) {
+                    command = command.replaceAll("<PLAYER>", player.getDisplayName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                }
+            }
+        }
 
         player.sendMessage(color(this.getConfig().getString("prefix") + deleteProfileMessage));
     }

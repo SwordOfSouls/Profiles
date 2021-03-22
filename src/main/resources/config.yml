@@ -13,8 +13,36 @@ deleteProfileMessage: " &aSuccessfully deleted profile on slot #<SLOT_NUMBER>!"
 saveDoesNotExistOnSlotMessage: " &cYou do not have a save on slot #<SLOT_NUMBER>!"
 invalidSlotMessage: " &cSlot #<SLOT_NUMBER> is not a valid save slot!"
 
+# Profiles - fresh start
 freshStart:
   freshStartOnNewSave: true
   teleportToSpawnOnNewSave: true
+
+# Profiles - commands
+# These configurable list of commands will all be dispatched for the given action (save/load/delete) slot pair.
+# The token <PLAYER> will be replaced with the player's in-game name.
+commands:
+  onSave:
+    slot0:
+      -
+    slot1:
+      -
+    slot2:
+      -
+  onLoad:
+    slot0:
+      -
+    slot1:
+      -
+    slot2:
+      -
+  onDelete:
+    slot0:
+      -
+    slot1:
+      -
+    slot2:
+      -
+
 shouldSaveOnPlayerLeave: true
 data:
