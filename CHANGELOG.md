@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.9.7] - 03-21-2021
+
+Dispatch n-commands from config.yml list on save, load or delete of profiles.
+
 ## [1.8.7] - 03-21-2021
 
 Extend save, load and delete functionality to command-line.
