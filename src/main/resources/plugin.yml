@@ -1,5 +1,5 @@
 name: Profiles
-version: 1.9.7
+version: 2.0.0
 main: com.cmpscjg.profiles.Profiles
 api-version: 1.16
 authors: [ CMPSCjg ]
