@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.0] - 03-25-2021
+
+Move data section from config.yml to data.yml.
+
+## Changed
+- Major breaking change. Plugin users WILL need to copy over data section from config.yml to data.yml manually to persist old data.
+
 ## [1.9.7] - 03-21-2021
 
 Dispatch n-commands from config.yml list on save, load or delete of profiles.

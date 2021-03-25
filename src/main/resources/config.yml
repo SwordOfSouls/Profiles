@@ -1,6 +1,4 @@
 # Profiles - Configuration
-# Each player will have 3 save slots stored in this file.
-# Any changes to the values in the 'data' section WILL affect the player's saved profile. Modify at your own risk!
 prefix: "&8[&dProfiles&8]"
 inventoryTitle: "Profiles - Main Menu"
 previewPlayerTitle: "Preview - Player Inventory"

@@ -1,6 +1,8 @@
 package com.cmpscjg.profiles;
 
+import com.cmpscjg.profiles.files.DataManager;
 import com.cmpscjg.profiles.utils.BukkitSerialization;
+import com.cmpscjg.profiles.utils.DataHelper;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -10,7 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -46,6 +47,10 @@ public final class Profiles extends JavaPlugin implements Listener {
         AUTO
     }
 
+    public DataManager data;
+
+    public DataHelper dataHelper;
+
     @Override
     public void onEnable() {
 
@@ -54,6 +59,12 @@ public final class Profiles extends JavaPlugin implements Listener {
 
         // Get plugin version
         pluginVersion = this.getDescription().getVersion();
+
+        // Initialize all the separate YAML manager classes
+        this.data = new DataManager(this);
+
+        // Initialize all the utility classes
+        this.dataHelper = new DataHelper(this);
 
         // Register main class events
         this.getServer().getPluginManager().registerEvents(this, this);
@@ -138,17 +149,17 @@ public final class Profiles extends JavaPlugin implements Listener {
                 case 13:
                 case 14:
                     int configSlot = slotMapper.get(i);
-                    if (this.getConfig().contains("data." + uuid + ".slot" + configSlot)) {
+                    if (this.data.getConfig().contains("data." + uuid + ".slot" + configSlot)) {
                         // TODO: Re-visit this prettify logic.
-                        // String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".dateSaved"))));
-                        double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".healthLevel");
-                        int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".hungerLevel");
-                        int xpLevel = this.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".experience.xpLevel");
-                        float xpPoints = (float) this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".experience.xpPoints");
-                        String world = this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".location.world");
-                        int X = (int) this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.X");
-                        int Y = (int) this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.Y");
-                        int Z = (int) this.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.Z");
+                        // String dateTimeString = new SimpleDateFormat("dd/MM/yyyy hh.mm aa").format(new Date(Objects.requireNonNull(this.data.getConfig().getString("data." + uuid + ".slot" + configSlot + ".dateSaved"))));
+                        double healthLevel = this.data.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".healthLevel");
+                        int hungerLevel = this.data.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".hungerLevel");
+                        int xpLevel = this.data.getConfig().getInt("data." + uuid + ".slot" + configSlot + ".experience.xpLevel");
+                        float xpPoints = (float) this.data.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".experience.xpPoints");
+                        String world = this.data.getConfig().getString("data." + uuid + ".slot" + configSlot + ".location.world");
+                        int X = (int) this.data.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.X");
+                        int Y = (int) this.data.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.Y");
+                        int Z = (int) this.data.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.Z");
 
                         ArrayList<String> limeGlassPaneLore = new ArrayList<>();
                         limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
@@ -238,23 +249,23 @@ public final class Profiles extends JavaPlugin implements Listener {
         double Y = player.getLocation().getY();
         double Z = player.getLocation().getZ();
 
-        // Set data to config.yml
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".playerName", playerName);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".dateSaved", dateSaved);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".healthLevel", healthLevel);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".hungerLevel", hungerLevel);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".experience.xpLevel", xpLevel);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".experience.xpPoints", xpPoints);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".playerInventory", base64PlayerInventory);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".playerArmor", base64PlayerArmor);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".enderChestInventory", base64EnderChestInventory);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".location.world", world);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".location.X", X);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".location.Y", Y);
-        this.getConfig().set("data." + uuid + ".slot" + saveSlot + ".location.Z", Z);
+        // Set data to data.yml
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".playerName", playerName);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".dateSaved", dateSaved);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".healthLevel", healthLevel);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".hungerLevel", hungerLevel);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".experience.xpLevel", xpLevel);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".experience.xpPoints", xpPoints);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".playerInventory", base64PlayerInventory);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".playerArmor", base64PlayerArmor);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".enderChestInventory", base64EnderChestInventory);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".location.world", world);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".location.X", X);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".location.Y", Y);
+        this.data.getConfig().set("data." + uuid + ".slot" + saveSlot + ".location.Z", Z);
 
-        // Save data to config.yml
-        this.saveConfig();
+        // Save data to data.yml
+        this.data.saveConfig();
 
         // Store which slot the player saved to. Making it the current slot
         currentSlotMapper.put(player.getDisplayName(), saveSlot);
@@ -287,23 +298,23 @@ public final class Profiles extends JavaPlugin implements Listener {
         }
 
         // Check if save data does not exist for the provided slot
-        if (!this.getConfig().contains("data." + uuid + ".slot" + saveSlot)) {
+        if (!this.data.getConfig().contains("data." + uuid + ".slot" + saveSlot)) {
             player.sendMessage(color(this.getConfig().getString("prefix") + saveDoesNotExistOnSlotMessage));
             return;
         }
 
-        // Get data to config.yml
-        double healthLevel = this.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".healthLevel");
-        int hungerLevel = this.getConfig().getInt("data." + uuid + ".slot" + saveSlot + ".hungerLevel");
-        int xpLevel = this.getConfig().getInt("data." + uuid + ".slot" + saveSlot + ".experience.xpLevel");
-        float xpPoints = (float) this.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".experience.xpPoints");
-        String base64PlayerInventory = this.getConfig().getString("data." + uuid + ".slot" + saveSlot + ".playerInventory");
-        String base64PlayerArmor = this.getConfig().getString("data." + uuid + ".slot" + saveSlot + ".playerArmor");
-        String base64EnderChestInventory = this.getConfig().getString("data." + uuid + ".slot" + saveSlot + ".enderChestInventory");
-        String world = this.getConfig().getString("data." + uuid + ".slot" + saveSlot + ".location.world");
-        double X = this.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".location.X");
-        double Y = this.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".location.Y");
-        double Z = this.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".location.Z");
+        // Get data from data.yml
+        double healthLevel = this.data.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".healthLevel");
+        int hungerLevel = this.data.getConfig().getInt("data." + uuid + ".slot" + saveSlot + ".hungerLevel");
+        int xpLevel = this.data.getConfig().getInt("data." + uuid + ".slot" + saveSlot + ".experience.xpLevel");
+        float xpPoints = (float) this.data.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".experience.xpPoints");
+        String base64PlayerInventory = this.data.getConfig().getString("data." + uuid + ".slot" + saveSlot + ".playerInventory");
+        String base64PlayerArmor = this.data.getConfig().getString("data." + uuid + ".slot" + saveSlot + ".playerArmor");
+        String base64EnderChestInventory = this.data.getConfig().getString("data." + uuid + ".slot" + saveSlot + ".enderChestInventory");
+        String world = this.data.getConfig().getString("data." + uuid + ".slot" + saveSlot + ".location.world");
+        double X = this.data.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".location.X");
+        double Y = this.data.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".location.Y");
+        double Z = this.data.getConfig().getDouble("data." + uuid + ".slot" + saveSlot + ".location.Z");
 
         // Clean incoming data from config.yml to prevent errors
         // Assign properties to default Minecraft starting values if bad data exists.
@@ -369,9 +380,9 @@ public final class Profiles extends JavaPlugin implements Listener {
             commandsToDispatchOnDelete = (List<String>) this.getConfig().getList("commands.onDelete.slot" + saveSlot);
         }
 
-        // Remove the appropriate slot section from config.yml
-        this.getConfig().set("data." + uuid + ".slot" + Integer.toString(saveSlot), null);
-        this.saveConfig();
+        // Remove the appropriate slot section from data.yml
+        this.data.getConfig().set("data." + uuid + ".slot" + Integer.toString(saveSlot), null);
+        this.data.saveConfig();
 
         // Dispatch any and all commands defined for the save slot
         if (commandsToDispatchOnDelete != null) {
@@ -389,9 +400,9 @@ public final class Profiles extends JavaPlugin implements Listener {
     public void previewInventory(int configSlot, Player player, boolean isLeftClick) throws IOException {
         UUID uuid = player.getUniqueId();
 
-        // Get data to config.yml
-        String base64PlayerInventory = this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".playerInventory");
-        String base64EnderChestInventory = this.getConfig().getString("data." + uuid + ".slot" + configSlot + ".enderChestInventory");
+        // Get data from data.yml
+        String base64PlayerInventory = this.data.getConfig().getString("data." + uuid + ".slot" + configSlot + ".playerInventory");
+        String base64EnderChestInventory = this.data.getConfig().getString("data." + uuid + ".slot" + configSlot + ".enderChestInventory");
 
         // Set player data
         ItemStack[] playerInventoryContents = bukkitSerialization.itemStackArrayFromBase64(base64PlayerInventory);
@@ -487,7 +498,7 @@ public final class Profiles extends JavaPlugin implements Listener {
                             player.sendMessage(color(this.getConfig().getString("prefix") + invalidSlotMessage));
                         } else {
                             if (args[0].equalsIgnoreCase("save")) {
-                                boolean doesSaveExist = this.getConfig().contains("data." + player.getUniqueId() + ".slot" + slotProvided);
+                                boolean doesSaveExist = this.data.getConfig().contains("data." + player.getUniqueId() + ".slot" + slotProvided);
                                 saveProfile(slotProvided, player, doesSaveExist ? SaveTypeEnum.EXISTING : SaveTypeEnum.NEW);
                             } else if (args[0].equalsIgnoreCase("load")) {
                                 loadProfile(slotProvided, player);
