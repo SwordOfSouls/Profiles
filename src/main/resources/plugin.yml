@@ -1,7 +1,7 @@
 name: Profiles
-version: 2.0.0
+version: 2.1.0
 main: com.cmpscjg.profiles.Profiles
-api-version: 1.16
+api-version: 1.13
 authors: [ CMPSCjg ]
 description: Bukkit/Spigot plugin that allows players to save progress to profiles.
 website: https://github.com/CMPSCjg
