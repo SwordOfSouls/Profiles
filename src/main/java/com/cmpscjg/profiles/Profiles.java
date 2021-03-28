@@ -3,6 +3,7 @@ package com.cmpscjg.profiles;
 import com.cmpscjg.profiles.files.DataManager;
 import com.cmpscjg.profiles.utils.BukkitSerialization;
 import com.cmpscjg.profiles.utils.DataHelper;
+import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -111,7 +112,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         String profilesInvTitle = color(this.getConfig().getString("inventoryTitle"));
 
         Inventory profilesInv = Bukkit.createInventory(null, profilesInvSize, profilesInvTitle);
-        ItemStack clearGlassPane = new ItemStack(Material.GLASS_PANE);
+        ItemStack clearGlassPane = XMaterial.GLASS_PANE.parseItem();
         ItemMeta clearGlassPaneIM = clearGlassPane.getItemMeta();
         assert clearGlassPaneIM != null;
         clearGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
@@ -120,18 +121,18 @@ public final class Profiles extends JavaPlugin implements Listener {
         clearGlassPaneIM.setLore(clearGlassPaneLore);
         clearGlassPane.setItemMeta(clearGlassPaneIM);
 
-        ItemStack blackGlassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemStack blackGlassPane = XMaterial.BLACK_STAINED_GLASS_PANE.parseItem();
         ItemMeta blackGlassPaneIM = blackGlassPane.getItemMeta();
         assert blackGlassPaneIM != null;
         blackGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
         blackGlassPane.setItemMeta(blackGlassPaneIM);
 
-        ItemStack limeGlassPane = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+        ItemStack limeGlassPane = XMaterial.LIME_STAINED_GLASS_PANE.parseItem();
         ItemMeta limeGlassPaneIM = limeGlassPane.getItemMeta();
         assert limeGlassPaneIM != null;
         limeGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
 
-        ItemStack redGlassPane = new ItemStack(Material.RED_STAINED_GLASS_PANE);
+        ItemStack redGlassPane = XMaterial.RED_STAINED_GLASS_PANE.parseItem();
         ItemMeta redGlassPaneIM = redGlassPane.getItemMeta();
         assert redGlassPaneIM != null;
         redGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
@@ -407,7 +408,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         // Set player data
         ItemStack[] playerInventoryContents = bukkitSerialization.itemStackArrayFromBase64(base64PlayerInventory);
         ItemStack[] enderChestInventory = bukkitSerialization.itemStackArrayFromBase64(base64EnderChestInventory);
-        ItemStack closeButton = new ItemStack(Material.BARRIER, 1);
+        ItemStack closeButton = XMaterial.BARRIER.parseItem();
         ItemMeta closeButtonIM = closeButton.getItemMeta();
         assert closeButtonIM != null;
         closeButtonIM.setDisplayName(color(this.getConfig().getString("prefix")));
@@ -427,7 +428,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         previewEnderchestInv.setItem(44, closeButton);
 
         // Set empty inventory slots to stained glass item
-        ItemStack blackGlassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemStack blackGlassPane = XMaterial.BLACK_STAINED_GLASS_PANE.parseItem();
         ItemMeta blackGlassPaneIM = blackGlassPane.getItemMeta();
         assert blackGlassPaneIM != null;
         blackGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
@@ -614,9 +615,9 @@ public final class Profiles extends JavaPlugin implements Listener {
                 // If the item is a lime glass pane, there is existing save data.
                 // If the click is a shift-click, we will preview the inventories.
                 // If the click is not a shift-click, we will save/load the profile.
-                if (itemMaterial == Material.GLASS_PANE) {
+                if (itemMaterial == XMaterial.GLASS_PANE.parseMaterial()) {
                     saveProfile(configSlot, player, SaveTypeEnum.NEW);
-                } else if (itemMaterial == Material.LIME_STAINED_GLASS_PANE) {
+                } else if (itemMaterial == XMaterial.LIME_STAINED_GLASS_PANE.parseMaterial()) {
                     if (event.getClick().isShiftClick()) {
                         previewInventory(configSlot, player, event.getClick().isLeftClick());
                     } else {
@@ -656,7 +657,7 @@ public final class Profiles extends JavaPlugin implements Listener {
             Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
 
             // If they click the close button, close this inventory and re-open the Profiles menu
-            if (itemMaterial == Material.BARRIER) {
+            if (itemMaterial == XMaterial.BARRIER.parseMaterial()) {
                 player.closeInventory();
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> openProfilesInventory(player), 0);
             }
@@ -712,12 +713,10 @@ public final class Profiles extends JavaPlugin implements Listener {
 
     // Auto save the Player's Profile when they pick up a new item
     @EventHandler
-    public void onPlayerPickup(EntityPickupItemEvent event) {
-        Player player = null;
+    public void onPlayerPickup(PlayerPickupItemEvent event) {
+        Player player = event.getPlayer();
 
         // Ensure entity is a player before casting it as such
-        if (event.getEntity() instanceof Player) {
-            player = (Player) event.getEntity();
             int currentProfileSlot = -1;
             if (currentSlotMapper.containsKey(player.getDisplayName())) {
                 currentProfileSlot = currentSlotMapper.get(player.getDisplayName());
@@ -726,7 +725,6 @@ public final class Profiles extends JavaPlugin implements Listener {
                 Bukkit.getScheduler().runTaskLater(this, () ->
                         saveProfile(finalCurrentProfileSlot, finalPlayer, SaveTypeEnum.AUTO), 0);
             }
-        }
     }
 
     // Auto save the Player's Profile when they drop an item
