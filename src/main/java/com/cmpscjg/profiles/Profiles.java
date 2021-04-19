@@ -112,32 +112,39 @@ public final class Profiles extends JavaPlugin implements Listener {
         String profilesInvTitle = color(this.getConfig().getString("inventoryTitle"));
 
         Inventory profilesInv = Bukkit.createInventory(null, profilesInvSize, profilesInvTitle);
-        ItemStack clearGlassPane = XMaterial.GLASS_PANE.parseItem();
+
+        ItemStack clearGlassPane = XMaterial.matchXMaterial(getConfig().getString("GUI.emptySlot.material")).get().parseItem();
         ItemMeta clearGlassPaneIM = clearGlassPane.getItemMeta();
         assert clearGlassPaneIM != null;
-        clearGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        clearGlassPaneIM.setDisplayName(color(getConfig().getString("GUI.emptySlot.name")));
         ArrayList<String> clearGlassPaneLore = new ArrayList<>();
-        clearGlassPaneLore.add(color("&fClick to start a new save in this save slot."));
+        for (String line : getConfig().getStringList("GUI.emptySlot.lore"))
+            clearGlassPaneLore.add(color(line));
         clearGlassPaneIM.setLore(clearGlassPaneLore);
         clearGlassPane.setItemMeta(clearGlassPaneIM);
 
-        ItemStack blackGlassPane = XMaterial.BLACK_STAINED_GLASS_PANE.parseItem();
+        ItemStack blackGlassPane = XMaterial.matchXMaterial(getConfig().getString("GUI.default.material")).get().parseItem();
         ItemMeta blackGlassPaneIM = blackGlassPane.getItemMeta();
         assert blackGlassPaneIM != null;
-        blackGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        ArrayList<String> defaultLore = new ArrayList<>();
+        for (String line : getConfig().getStringList("GUI.default.lore"))
+            defaultLore.add(color(line));
+        blackGlassPaneIM.setLore(defaultLore);
+        blackGlassPaneIM.setDisplayName(color(getConfig().getString("GUI.default.name")));
         blackGlassPane.setItemMeta(blackGlassPaneIM);
 
-        ItemStack limeGlassPane = XMaterial.LIME_STAINED_GLASS_PANE.parseItem();
+        ItemStack limeGlassPane = XMaterial.matchXMaterial(getConfig().getString("GUI.savedSlot.material")).get().parseItem();
         ItemMeta limeGlassPaneIM = limeGlassPane.getItemMeta();
         assert limeGlassPaneIM != null;
-        limeGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        limeGlassPaneIM.setDisplayName(color(getConfig().getString("GUI.savedSlot.name")));
 
-        ItemStack redGlassPane = XMaterial.RED_STAINED_GLASS_PANE.parseItem();
+        ItemStack redGlassPane = XMaterial.matchXMaterial(getConfig().getString("GUI.deleteSave.material")).get().parseItem();
         ItemMeta redGlassPaneIM = redGlassPane.getItemMeta();
         assert redGlassPaneIM != null;
-        redGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        redGlassPaneIM.setDisplayName(color(getConfig().getString("GUI.deleteSave.name")));
         ArrayList<String> redGlassPaneLore = new ArrayList<>();
-        redGlassPaneLore.add(color("&cClick to delete the save slot above."));
+        for (String line : getConfig().getStringList("GUI.deleteSave.lore"))
+            redGlassPaneLore.add(color(line));
         redGlassPaneIM.setLore(redGlassPaneLore);
         redGlassPane.setItemMeta(redGlassPaneIM);
 
@@ -162,20 +169,39 @@ public final class Profiles extends JavaPlugin implements Listener {
                         int Y = (int) this.data.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.Y");
                         int Z = (int) this.data.getConfig().getDouble("data." + uuid + ".slot" + configSlot + ".location.Z");
 
-                        ArrayList<String> limeGlassPaneLore = new ArrayList<>();
-                        limeGlassPaneLore.add(color("&cLeft-Click to load this save slot."));
-                        limeGlassPaneLore.add(color("&cRight-Click to overwrite this save slot."));
-                        limeGlassPaneLore.add(color("&e*&8-----------&e*"));
-                        limeGlassPaneLore.add(color("&cShift Left-Click to see inventory."));
-                        limeGlassPaneLore.add(color("&cShift Right-Click to see ender chest."));
-                        limeGlassPaneLore.add(color("&e*&8-----------&e*"));
-                        // limeGlassPaneLore.add(color("&7Date saved: " + "&6" + dateTimeString));
-                        limeGlassPaneLore.add(color("&7Health: " + "&6" + healthLevel));
-                        limeGlassPaneLore.add(color("&7Hunger: " + "&6" + hungerLevel));
-                        limeGlassPaneLore.add(color("&7XP Level: " + "&6" + xpLevel));
-                        limeGlassPaneLore.add(color("&7XP Points: " + "&6" + xpPoints));
-                        limeGlassPaneLore.add(color("&7Location: " + "&6" + world + "<" + X + " " + Y + " " + Z + ">"));
-                        limeGlassPaneIM.setLore(limeGlassPaneLore);
+                        ArrayList<String> savedSlotLore = new ArrayList<>();
+                        for (String line : getConfig().getStringList("GUI.savedSlot.lore"))
+                            savedSlotLore.add(color(line));
+
+                        for (String line : getConfig().getStringList("GUI.savedSlot.saveDataLore")) {
+
+                            if (line.contains("%health%"))
+                                line = line.replace("%health%", String.valueOf(healthLevel));
+
+                            if (line.contains("%hunger%"))
+                                line = line.replace("%hunger%", String.valueOf(hungerLevel));
+
+                            if (line.contains("%xp_level%"))
+                                line = line.replace("%xp_level%", String.valueOf(xpLevel));
+
+                            if (line.contains("%xp_points%"))
+                                line = line.replace("%xp_points%", String.valueOf(xpPoints));
+
+                            if (line.contains("%world%"))
+                                line = line.replace("%world%", String.valueOf(world));
+
+                            if (line.contains("%X%"))
+                                line = line.replace("%X%", String.valueOf(X));
+
+                            if (line.contains("%Y%"))
+                                line = line.replace("%Y%", String.valueOf(Y));
+
+                            if (line.contains("%Z%"))
+                                line = line.replace("%Z%", String.valueOf(Z));
+
+                            savedSlotLore.add(color(line));
+                        }
+                        limeGlassPaneIM.setLore(savedSlotLore);
                         limeGlassPane.setItemMeta(limeGlassPaneIM);
 
                         profilesInv.setItem(i, limeGlassPane);
@@ -408,12 +434,13 @@ public final class Profiles extends JavaPlugin implements Listener {
         // Set player data
         ItemStack[] playerInventoryContents = bukkitSerialization.itemStackArrayFromBase64(base64PlayerInventory);
         ItemStack[] enderChestInventory = bukkitSerialization.itemStackArrayFromBase64(base64EnderChestInventory);
-        ItemStack closeButton = XMaterial.BARRIER.parseItem();
+        ItemStack closeButton = XMaterial.matchXMaterial(getConfig().getString("GUI.closeButton.material")).get().parseItem();
         ItemMeta closeButtonIM = closeButton.getItemMeta();
         assert closeButtonIM != null;
-        closeButtonIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        closeButtonIM.setDisplayName(color(getConfig().getString("GUI.closeButton.name")));
         ArrayList<String> clearGlassPaneLore = new ArrayList<>();
-        clearGlassPaneLore.add(color("&fClick to return the Profiles - main menu."));
+        for (String line : getConfig().getStringList("GUI.closeButton.lore"))
+            clearGlassPaneLore.add(color(line));
         closeButtonIM.setLore(clearGlassPaneLore);
         closeButton.setItemMeta(closeButtonIM);
 
@@ -428,10 +455,14 @@ public final class Profiles extends JavaPlugin implements Listener {
         previewEnderchestInv.setItem(44, closeButton);
 
         // Set empty inventory slots to stained glass item
-        ItemStack blackGlassPane = XMaterial.BLACK_STAINED_GLASS_PANE.parseItem();
+        ItemStack blackGlassPane = XMaterial.matchXMaterial(getConfig().getString("GUI.default.material")).get().parseItem();
         ItemMeta blackGlassPaneIM = blackGlassPane.getItemMeta();
         assert blackGlassPaneIM != null;
-        blackGlassPaneIM.setDisplayName(color(this.getConfig().getString("prefix")));
+        ArrayList<String> defaultLore = new ArrayList<>();
+        for (String line : getConfig().getStringList("GUI.default.lore"))
+            defaultLore.add(color(line));
+        blackGlassPaneIM.setLore(defaultLore);
+        blackGlassPaneIM.setDisplayName(color(getConfig().getString("GUI.default.name")));
         blackGlassPane.setItemMeta(blackGlassPaneIM);
 
         int slotIndex = 0;
