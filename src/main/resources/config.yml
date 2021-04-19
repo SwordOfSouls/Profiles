@@ -11,6 +11,56 @@ deleteProfileMessage: " &aSuccessfully deleted profile on slot #<SLOT_NUMBER>!"
 saveDoesNotExistOnSlotMessage: " &cYou do not have a save on slot #<SLOT_NUMBER>!"
 invalidSlotMessage: " &cSlot #<SLOT_NUMBER> is not a valid save slot!"
 
+# Profiles - GUI
+GUI:
+
+  # Defines the default item to place in an otherwise blank, inventory slot.
+  default:
+    material: BLACK_STAINED_GLASS_PANE
+    name: "&8[&dProfiles&8]"
+    lore:
+      - "&7Thanks for using Profiles!"
+
+  # Defines the item to place when the save slot has no saved data.
+  emptySlot:
+    material: GLASS_PANE
+    name: "&7Empty save slot."
+    lore:
+      - "&fClick to start a new save in this save slot."
+
+  # Defines the item to place when the save slot has saved data.
+  savedSlot:
+    material: LIME_STAINED_GLASS_PANE
+    name: "&aSaved profile"
+    lore:
+      - "&cLeft-Click to load this save slot."
+      - "&cRight-Click to overwrite this save slot."
+      - "&e*&8-----------&e*"
+      - "&cShift Left-Click to see inventory."
+      - "&cShift Right-Click to see ender chest."
+      - "&e*&8-----------&e*"
+
+    saveDataLore:
+      - "&7Health: &6%health%"
+      - "&7Hunger: &6%hunger%"
+      - "&7XP Level: &6%xp_level%"
+      - "&7XP Points: &6%xp_points%"
+      - "&7Location: &6%world%<%X% %Y% %Z%>"
+
+  # Defines the item to place for deleting saved data.
+  deleteSave:
+    material: RED_STAINED_GLASS_PANE
+    name: "&cDelete profile"
+    lore:
+      - "&cClick to delete the save slot above."
+
+  # Defines the item to place for the back button on the preview inventories.
+  closeButton:
+    material: BARRIER
+    name: "&8[&dProfiles&8]"
+    lore:
+      - "&fClick to return the Profiles - main menu."
+
 # Profiles - fresh start
 freshStart:
   freshStartOnNewSave: true
