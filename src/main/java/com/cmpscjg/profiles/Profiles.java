@@ -646,9 +646,12 @@ public final class Profiles extends JavaPlugin implements Listener {
                 // If the item is a lime glass pane, there is existing save data.
                 // If the click is a shift-click, we will preview the inventories.
                 // If the click is not a shift-click, we will save/load the profile.
-                if (itemMaterial == XMaterial.GLASS_PANE.parseMaterial()) {
+                ItemStack emptySlot = XMaterial.matchXMaterial(getConfig().getString("GUI.emptySlot.material")).get().parseItem();
+                ItemStack savedSlot = XMaterial.matchXMaterial(getConfig().getString("GUI.savedSlot.material")).get().parseItem();
+
+                if (itemMaterial == emptySlot.getType()) {
                     saveProfile(configSlot, player, SaveTypeEnum.NEW);
-                } else if (itemMaterial == XMaterial.LIME_STAINED_GLASS_PANE.parseMaterial()) {
+                } else if (itemMaterial == savedSlot.getType()) {
                     if (event.getClick().isShiftClick()) {
                         previewInventory(configSlot, player, event.getClick().isLeftClick());
                     } else {
@@ -686,9 +689,10 @@ public final class Profiles extends JavaPlugin implements Listener {
             }
 
             Material itemMaterial = Objects.requireNonNull(inventoryClicked.getItem(slotClicked)).getType();
+            ItemStack closeButton = XMaterial.matchXMaterial(getConfig().getString("GUI.closeButton.material")).get().parseItem();
 
             // If they click the close button, close this inventory and re-open the Profiles menu
-            if (itemMaterial == XMaterial.BARRIER.parseMaterial()) {
+            if (itemMaterial == closeButton.getType()) {
                 player.closeInventory();
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> openProfilesInventory(player), 0);
             }
