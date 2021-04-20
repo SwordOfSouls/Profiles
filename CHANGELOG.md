@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.1] - 04-20-2021
+
+Fix bug preventing save clicks from working.
+
 ## [2.2.0] - 04-19-2021
 
 Make GUI elements customizable.
