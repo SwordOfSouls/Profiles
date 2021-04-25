@@ -245,6 +245,8 @@ public final class Profiles extends JavaPlugin implements Listener {
             if (freshStartOnNewSave) {
                 player.setHealth(20.0);
                 player.setFoodLevel(20);
+                player.setExp(0);
+                player.setLevel(0);
                 player.setTotalExperience(0);
                 player.getInventory().clear();
                 player.getEnderChest().clear();
@@ -371,7 +373,9 @@ public final class Profiles extends JavaPlugin implements Listener {
         player.getEnderChest().setContents(enderChestInventory);
         player.setHealth(healthLevel);
         player.setFoodLevel(hungerLevel);
-        player.setLevel(xpLevel);
+        player.setExp(0);
+        player.setLevel(0);
+        player.giveExp(xpLevel);
         player.setExp(xpPoints);
 
         // Teleport player to saved location
