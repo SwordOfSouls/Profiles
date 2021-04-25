@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.2] - 04-25-2021
+
+Fix bug related to xp saving and loading.
+
 ## [2.2.1] - 04-20-2021
 
 Fix bug preventing save clicks from working.
