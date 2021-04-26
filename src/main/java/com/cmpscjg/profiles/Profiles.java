@@ -265,7 +265,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         String dateSaved = new Date().toString();
         double healthLevel = player.getHealth();
         int hungerLevel = player.getFoodLevel();
-        int xpLevel = player.getTotalExperience();
+        int xpLevel = player.getLevel();
         float xpPoints = player.getExp();
 
         // Need to serialize the player's inventory and ender chest inventory to base64 and store as a string
@@ -375,7 +375,7 @@ public final class Profiles extends JavaPlugin implements Listener {
         player.setFoodLevel(hungerLevel);
         player.setExp(0);
         player.setLevel(0);
-        player.giveExp(xpLevel);
+        player.setLevel(xpLevel);
         player.setExp(xpPoints);
 
         // Teleport player to saved location
