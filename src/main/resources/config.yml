@@ -45,6 +45,7 @@ GUI:
       - "&7Hunger: &6%hunger%"
       - "&7XP Level: &6%xp_level%"
       - "&7XP Points: &6%xp_points%"
+      - "&7Coins: &6%coins%"
       - "&7Location: &6%world%<%X% %Y% %Z%>"
 
   # Defines the item to place for deleting saved data.
